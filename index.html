@@ -612,6 +612,7 @@ function buildFicha(r, qMap, bMap) {
     const b = bMap.get(id) || {};
     base.encabezado = [toNum(b.encabezado_izq), toNum(b.encabezado_der)];
     base.tiempos = [
+      ["Subida Molde (Manga)", toNum(b.encabezado_izq), toNum(b.encabezado_der)],
       ["Ret. Subir Brazo", toNum(b.tiempos_Ret_Subir_Brazo_L), toNum(b.tiempos_Ret_Subir_Brazo_R)],
       ["Ret. Bajar Brazo", toNum(b.tiempos_Ret_Bajar_Brazo_L), toNum(b.tiempos_Ret_Bajar_Brazo_R)],
       ["Ret. Corte Manga", toNum(b.tiempos_Ret_Corte_Manga_L), toNum(b.tiempos_Ret_Corte_Manga_R)],
@@ -918,7 +919,7 @@ function bodyBekum(f){
     <div class="bars">${bars}</div>
     <div class="key"><span><b style="background:var(--yellow)"></b>IZQ (I)</span><span><b style="background:var(--steel)"></b>DER (D)</span><span><b style="background:var(--hi)"></b>valor distinto entre lados</span></div>
     <p class="note"><span class="flag">UNIDAD POR CONFIRMAR</span>La pantalla dice "Tiempo en Seg." pero los valores (por ejemplo ${soploVal}) no caben en un ciclo de ${num(f.ciclo)} s. Se asume 1 unidad = ${num(U.factor)} s. Cada barra es la duración de un ajuste; no indica el orden de las etapas.</p>
-    <p class="note">Se registran los valores de ajuste (columnas azules). Las columnas de la derecha de cada lado cambian durante el ciclo y no se guardan. Encabezado de la pantalla: ${n1(f.encabezado[0])} (izq) y ${n1(f.encabezado[1])} (der), sin etiqueta.</p>
+    <p class="note">Se registran los valores de ajuste (columnas azules). Las columnas de la derecha de cada lado cambian durante el ciclo y no se guardan.</p>
 
     ${secH('PANTALLA AJUSTE CALEFACCIÓN','Zonas de temperatura','Consigna en °C')}
     <div class="zones">${zones}</div>
@@ -1123,7 +1124,7 @@ function paint(ctx, draw, f, img){
     R(bx+230,y,14,10,C.hi); T('valor distinto entre lados', bx+252, y+10, '400 15px '+FB, C.steel);
     y += 24;
     T('UNIDAD POR CONFIRMAR: se asume 1 unidad = '+num(U.factor)+' s (la pantalla dice "Tiempo en Seg." pero los valores no caben en el ciclo).', M, y+12, '400 15px '+FB, C.steel); y += 20;
-    T('Se registran los valores de ajuste. Las columnas en vivo de la pantalla no se guardan. Encabezado: '+n1(f.encabezado[0])+' izq · '+n1(f.encabezado[1])+' der, sin etiqueta.', M, y+12, '400 15px '+FB, C.steel); y += 22;
+    T('Se registran los valores de ajuste. Las columnas en vivo de la pantalla no se guardan.', M, y+12, '400 15px '+FB, C.steel); y += 22;
 
     sec('PANTALLA AJUSTE CALEFACCIÓN','Zonas de temperatura','Consigna en °C');
     const zg = 8, zw = (IW-8*zg)/9;
