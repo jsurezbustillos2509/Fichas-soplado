@@ -170,6 +170,7 @@ h1,h2{margin:0}
 
 /* calefacción BEKUM */
 .zones{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px}
+.zones.z10{grid-template-columns:repeat(5,minmax(0,1fr))}
 .zt{border:1px solid var(--edge);padding:8px 6px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
 .zt.off{background:var(--panel-2)}
 .zt .zn{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
@@ -545,6 +546,7 @@ return {QRCode:req('index'),ECL:req('QRErrorCorrectLevel')};})();
 const URL_RECETAS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=0&single=true&output=csv";
 const URL_QCM     = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=1&single=true&output=csv";
 const URL_BEKUM   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=2&single=true&output=csv";
+const URL_QCM75   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=1304841054&single=true&output=csv";
 
 // Dirección pública en GitHub Pages para los QR
 const SHARE_BASE = (window.location.protocol.startsWith('http'))
@@ -581,7 +583,7 @@ function fetchCsv(url) {
   });
 }
 
-function buildFicha(r, qMap, bMap) {
+function buildFicha(r, qMap, bMap, q75Map) {
   const id = String(r.id || '').trim();
   const layout = String(r.layout || 'qcm').trim().toLowerCase();
   const base = {
@@ -652,6 +654,77 @@ function buildFicha(r, qMap, bMap) {
       casquillo: numOrNull(b.herramientas_casquillo),
       cuchilla: numOrNull(b.herramientas_cuchilla),
       cuello: numOrNull(b.herramientas_cuello)
+    };
+} else if (layout === 'qcm-75') {
+    const q = q75Map.get(id) || {};
+    base.time1 = [
+      ["BLOW", toNum(q.time1_BLOW)],
+      ["EXHAUST", toNum(q.time1_EXHAUST)],
+      ["CUT", toNum(q.time1_CUT)],
+      ["HEAD LIFT", toNum(q.time1_HEAD_LIFT)],
+      ["HOLD ON", toNum(q.time1_HOLD_ON)],
+      ["S-exhaust", toNum(q.time1_S_exhaust)],
+      ["PIN PRE-UP", toNum(q.time1_PIN_PRE_UP)],
+      ["FLASH", toNum(q.time1_FLASH)],
+      ["ROTATION TIME", toNum(q.time1_ROTATION_TIME)],
+      ["SPARE1", toNum(q.time1_SPARE1)],
+      ["SPARE2", toNum(q.time1_SPARE2)]
+    ];
+    base.time2 = {
+      izq: [
+        ["Station up delay", toNum(q.time2_Station_up_delay_L), toNum(q.time2_Station_up_delay_R)],
+        ["Mold close delay", toNum(q.time2_Mold_close_delay_L), toNum(q.time2_Mold_close_delay_R)],
+        ["Cutter delay", toNum(q.time2_Cutter_delay_L), toNum(q.time2_Cutter_delay_R)],
+        ["Station down delay", toNum(q.time2_Station_down_delay_L), toNum(q.time2_Station_down_delay_R)],
+        ["Head lift delay", toNum(q.time2_Head_lift_delay_L), toNum(q.time2_Head_lift_delay_R)],
+        ["Deflash delay", toNum(q.time2_Deflash_delay)]
+      ],
+      der: [
+        ["Pin down delay", toNum(q.time2_Pin_down_delay_L), toNum(q.time2_Pin_down_delay_R)],
+        ["Blow delay", toNum(q.time2_Blow_delay_L), toNum(q.time2_Blow_delay_R)],
+        ["Mold open delay", toNum(q.time2_Mold_open_delay_L), toNum(q.time2_Mold_open_delay_R)],
+        ["Pin up delay", toNum(q.time2_Pin_up_delay_L), toNum(q.time2_Pin_up_delay_R)],
+        ["Sub-mold delay", toNum(q.time2_Sub_mold_delay_L), toNum(q.time2_Sub_mold_delay_R)],
+        ["STATION Inplace", toNum(q.time2_Station_Inplace_L), toNum(q.time2_Station_Inplace_R)]
+      ]
+    };
+    base.pq1 = {
+      izq: [
+        ["M. close fast", toNum(q.pq1_M_close_fast_L), toNum(q.pq1_M_close_fast_R)],
+        ["M. close slow", toNum(q.pq1_M_close_slow_L), toNum(q.pq1_M_close_slow_R)],
+        ["M. close clamp", toNum(q.pq1_M_close_clamp_L), toNum(q.pq1_M_close_clamp_R)],
+        ["M. open", toNum(q.pq1_M_open_L), toNum(q.pq1_M_open_R)]
+      ],
+      der: [
+        ["Pin down fast", toNum(q.pq1_Pin_down_fast_L), toNum(q.pq1_Pin_down_fast_R)],
+        ["Pin down slow", toNum(q.pq1_Pin_down_slow_L), toNum(q.pq1_Pin_down_slow_R)],
+        ["Pin up", toNum(q.pq1_Pin_up_L), toNum(q.pq1_Pin_up_R)],
+        ["CAP CLOSE", toNum(q.pq1_CAP_CLOSE_L), toNum(q.pq1_CAP_CLOSE_R)],
+        ["CAP OPEN", toNum(q.pq1_CAP_OPEN_L), toNum(q.pq1_CAP_OPEN_R)]
+      ]
+    };
+    base.pq2 = [
+      { t: "L · Station up", P: [toNum(q.pq2_L_Station_up_P1), toNum(q.pq2_L_Station_up_P2), toNum(q.pq2_L_Station_up_P3)], Q: [toNum(q.pq2_L_Station_up_Q1), toNum(q.pq2_L_Station_up_Q2), toNum(q.pq2_L_Station_up_Q3)] },
+      { t: "R · Station up", P: [toNum(q.pq2_R_Station_up_P1), toNum(q.pq2_R_Station_up_P2), toNum(q.pq2_R_Station_up_P3)], Q: [toNum(q.pq2_R_Station_up_Q1), toNum(q.pq2_R_Station_up_Q2), toNum(q.pq2_R_Station_up_Q3)] },
+      { t: "L · Station down", P: [toNum(q.pq2_L_Station_down_P1), toNum(q.pq2_L_Station_down_P2), toNum(q.pq2_L_Station_down_P3)], Q: [toNum(q.pq2_L_Station_down_Q1), toNum(q.pq2_L_Station_down_Q2), toNum(q.pq2_L_Station_down_Q3)] },
+      { t: "R · Station down", P: [toNum(q.pq2_R_Station_down_P1), toNum(q.pq2_R_Station_down_P2), toNum(q.pq2_R_Station_down_P3)], Q: [toNum(q.pq2_R_Station_down_Q1), toNum(q.pq2_R_Station_down_Q2), toNum(q.pq2_R_Station_down_Q3)] }
+    ];
+    base.temp = {
+      up: toNum(q.temp_up),
+      down: toNum(q.temp_down),
+      zonas: [1,2,3,4,5,6,7,8,9,10].map(z => ({
+        z,
+        on: toBool(q[`temp_z${z}_on`]),
+        consigna: numOrNull(q[`temp_z${z}_consigna`]),
+        actual: numOrNull(q[`temp_z${z}_actual`])
+      }))
+    };
+    base.variador = {
+      hz: toNum(q.variador_hz)
+    };
+    base.agujas = {
+      L: { casquillo: strOrNull(q.agujas_L_casquillo), cuchilla: strOrNull(q.agujas_L_cuchilla), cuello: strOrNull(q.agujas_L_cuello) },
+      R: { casquillo: strOrNull(q.agujas_R_casquillo), cuchilla: strOrNull(q.agujas_R_cuchilla), cuello: strOrNull(q.agujas_R_cuello) }
     };
   } else {
     const q = qMap.get(id) || {};
@@ -850,11 +923,55 @@ const secH = (tag, title, sub) => `<div class="sec-h"><span class="tag">${esc(ta
 const tile = (l, v, u, pend) => v===null || v===undefined
   ? `<div class="vf pend"><div class="l">${l}</div><div class="n">${pend||'por anotar'}</div></div>`
   : `<div class="vf"><div class="l">${l}</div><div class="n${v===0?' zero':''}">${num(v)}<small> ${u}</small></div></div>`;
-const tool = v => (v===null || v===undefined) ? `<div class="blank">por anotar</div>` : `<div class="blank filled">${num(v)}</div>`;
+const tool = (v, pend='por anotar') => (v===null || v===undefined) ? `<div class="blank">${pend}</div>` : `<div class="blank filled">${num(v)}</div>`;
 const axisHtml = (f, max) => `<div class="axis"><span></span><div class="ticks">${axisTicks(max).map(t=>`<span style="left:${t/max*100}%">${t} s</span>`).join('')}</div><span></span></div>`;
 const gridLines = max => axisTicks(max).slice(1).map(t=>`<i class="gl" style="left:${t/max*100}%"></i>`).join('');
 
 /* cuerpo de la ficha QCM */
+/* cuerpo de la ficha QCM-75 */
+function bodyQCM75(f){
+  const U = f.unidad, max = f.ciclo;
+  const bars = f.time1.map(([n,v])=>{
+    const w = Math.min(100, v*U.factor/max*100);
+    return `<div class="brow${v===0?' zero':''}"><div class="lb">${esc(n)}</div>
+      <div class="track" role="img" aria-label="${esc(n)}: ${secs(v,f)} segundos">${gridLines(max)}${v>0?`<div class="fill" style="width:max(4px,${w.toFixed(2)}%)"></div>`:''}</div>
+      <div class="vl">${secs(v,f)} s<small>valor ${num(v)}</small></div></div>`;
+  }).join('');
+  const pq2 = f.pq2.map(b=>`<div class="pqb"><h3>${esc(b.t)}</h3><div class="pqg">
+      <span></span><span class="h">1</span><span class="h">2</span><span class="h">3</span>
+      <span class="r">P</span>${b.P.map(v=>`<span class="v${v===0?' zero':''}">${num(v)}</span>`).join('')}
+      <span class="r">Q</span>${b.Q.map(v=>`<span class="v${v===0?' zero':''}">${num(v)}</span>`).join('')}
+    </div></div>`).join('');
+  const zones = f.temp.zonas.map(z=>`<div class="zt ${z.on?'on':'off'}"><div class="zn">Zona ${z.z}</div>
+      <span class="pill ${z.on?'ok':'bad'}">${z.on?'ON':'OFF'}</span>
+      <div class="zc">${z.consigna!==null?num(z.consigna):'###'}</div><div class="zl">CONSIGNA °C</div><div class="za">actual ${z.actual!==null?num(z.actual):'—'}</div></div>`).join('');
+  const a = f.agujas;
+  return `
+    ${secH('PANTALLA TIME 1','Tiempos del ciclo','A escala del ciclo de '+num(f.ciclo)+' s')}
+    ${axisHtml(f,max)}
+    <div class="bars">${bars}</div>
+    <p class="note"><span class="flag">UNIDAD POR CONFIRMAR</span>Se asume 1 unidad = ${num(U.factor)} s. Cada barra es la duración de un temporizador; no indica el orden de las etapas.</p>
+
+    ${secH('PANTALLA TIME 2','Retardos','L = izquierda · R = derecha')}
+    <div class="cols">${ptab(f.time2.izq)}${ptab(f.time2.der)}</div>
+
+    ${secH('PANTALLAS PQ VALVE 1 Y 2','Presión y caudal','P = presión · Q = caudal')}
+    <div class="cols">${ptab(f.pq1.izq)}${ptab(f.pq1.der)}</div>
+    <div class="pq2">${pq2}</div>
+
+    ${secH('PANTALLA TEMP SETTING','Zonas de temperatura','UP '+num(f.temp.up)+' · DOWN '+num(f.temp.down))}
+    <div class="zones z10">${zones}</div>
+
+    ${secH('VARIADOR','Lectura del variador','TRANSDUCER III')}
+    <div class="vfd">${tile('Frecuencia',f.variador.hz,'Hz')}</div>
+
+    ${secH('AGUJAS','Herramientas: casquillo, cuchilla y cuello','Para el cambio de formato')}
+    <div class="tools">
+      <span></span><span class="hh">Casquillo</span><span class="hh">Cuchilla</span><span class="hh">Altura cuello</span>
+      <span class="mo">Molde L</span>${tool(a.L.casquillo,'por colocar')}${tool(a.L.cuchilla,'por colocar')}${tool(a.L.cuello,'por colocar')}
+      <span class="mo">Molde R</span>${tool(a.R.casquillo,'por colocar')}${tool(a.R.cuchilla,'por colocar')}${tool(a.R.cuello,'por colocar')}
+    </div>`;
+}
 function bodyQCM(f){
   const U = f.unidad, max = f.ciclo;
   const bars = f.time1.map(([n,v])=>{
@@ -963,8 +1080,7 @@ function renderFicha(f){
         <div class="stat"><span class="n">${f.bolsas}</span><span class="l">Bolsas estándar</span><span class="h">${f.bolsasPeriodo?esc(f.bolsasPeriodo):'período por confirmar'}</span></div>
         <div class="stat"><span class="n${f.pesoG?'':' zero'}">${num(f.pesoG)} g</span><span class="l">Peso del envase</span><span class="h">${f.pesoG&&s.porCiclo?num(f.pesoG*s.porCiclo)+' g por ciclo':'falta anotar el peso'}</span></div>
       </div>
-      <div class="sec">${f.layout==='bekum' ? bodyBekum(f) : bodyQCM(f)}</div>
-      <div class="legend">${(f.leyenda||[]).map(t=>`<p>${esc(t)}</p>`).join('')}</div>
+<div class="sec">${f.layout==='bekum' ? bodyBekum(f) : (f.layout==='qcm-75' ? bodyQCM75(f) : bodyQCM(f))}</div>      <div class="legend">${(f.leyenda||[]).map(t=>`<p>${esc(t)}</p>`).join('')}</div>
       <div class="foot">
         <div class="qr">${qrSvg(url)}</div>
         <div>
@@ -1165,6 +1281,65 @@ function paint(ctx, draw, f, img){
     const h = f.herramientas, hw3 = (IW-2*12)/3;
     [['Casquillo',h.casquillo],['Cuchilla',h.cuchilla],['Altura del cuello',h.cuello]].forEach((t,i)=>box(M+i*(hw3+12), y, hw3, 86, t[0], t[1], 'mm'));
     y += 86;
+} else if (f.layout==='qcm-75') {
+    sec('PANTALLA TIME 1','Tiempos del ciclo','A escala del ciclo de '+f.ciclo+' s');
+    const lbW=190, vlW=170, bx=M+lbW+10, bw=IW-lbW-vlW-20, max=f.ciclo;
+    axisCv(bx,bw,max);
+    f.time1.forEach(([n,v])=>{
+      const sc = v*U.factor, w = Math.min(bw, sc/max*bw), rh = 40;
+      R(bx,y+4,bw,28,C.pan2); gridCv(bx,bw,max,y+4,28);
+      if(v>0){ R(bx,y+4,Math.max(4,w),28,C.yel); R(bx+Math.max(4,w)-3,y+4,3,28,C.ink); }
+      T(n.toUpperCase(), M, y+25, '600 22px '+FD, v===0?C.steel:C.ink);
+      T(secs(v,f)+' s', M+IW, y+18, '600 20px '+FM, v===0?C.steel:C.ink, 'right');
+      T('valor '+num(v), M+IW, y+34, '500 13px '+FM, C.steel, 'right');
+      y += rh;
+    });
+    y += 4;
+    T('UNIDAD POR CONFIRMAR: se asume 1 unidad = '+num(U.factor)+' s. Cada barra es la duración de un temporizador, no el orden de las etapas.', M, y+14, '400 15px '+FB, C.steel);
+    y += 14;
+    sec('PANTALLA TIME 2','Retardos','L = izquierda · R = derecha');
+    two(f.time2.izq, f.time2.der);
+    sec('PANTALLAS PQ VALVE 1 Y 2','Presión y caudal','P = presión · Q = caudal');
+    two(f.pq1.izq, f.pq1.der);
+    y += 16;
+    const bh = 30+24+2*34+10;
+    f.pq2.forEach((b,i)=>{
+      const x = M + (i%2)*(colW+30), yy = y + Math.floor(i/2)*(bh+14);
+      B(x,yy,colW,bh,C.ink,1);
+      T(b.t.toUpperCase(), x+12, yy+22, '600 15px '+FM, C.ink);
+      [1,2,3].forEach(k=>T(String(k), x+110+(k-1)*110+35, yy+46, '500 14px '+FM, C.steel, 'center'));
+      [['P',b.P],['Q',b.Q]].forEach(([l,vals],ri)=>{
+        const ry = yy+54+ri*34; T(l, x+14, ry+23, '700 19px '+FD, C.steel);
+        vals.forEach((v,k)=>{ const cx = x+110+k*110+35; R(cx-35,ry+3,70,28,C.pan2); T(num(v), cx, ry+25, (v===0?'500':'600')+' 21px '+FM, v===0?C.steel:C.ink, 'center'); });
+      });
+    });
+    y += 2*(bh+14) - 14;
+    sec('PANTALLA TEMP SETTING','Zonas de temperatura','UP '+num(f.temp.up)+' · DOWN '+num(f.temp.down));
+    const zg = 10, zw = (IW-4*zg)/5;
+    f.temp.zonas.forEach((z,i)=>{
+      const col = i % 5, row = Math.floor(i / 5);
+      const x = M + col*(zw+zg), yy = y + row*(128+10);
+      B(x,yy,zw,128,C.ink,1); if(!z.on) R(x+1,yy+1,zw-2,126,C.pan2);
+      T('ZONA '+z.z, x+zw/2, yy+24, '700 19px '+FD, C.ink, 'center');
+      pill(x+(zw-64)/2, yy+34, 64, z.on);
+      const cTxt = z.consigna!==null ? num(z.consigna) : '###';
+      T(cTxt, x+zw/2, yy+82, (z.on?'600':'500')+' 24px '+FM, z.on?C.ink:C.steel, 'center');
+      T('CONSIGNA °C', x+zw/2, yy+98, '600 12px '+FD, C.steel, 'center');
+      T('actual '+(z.actual!==null?num(z.actual):'—'), x+zw/2, yy+117, '400 13px '+FM, C.steel, 'center');
+    });
+    y += 2*(128+10) - 10;
+    sec('VARIADOR','Lectura del variador','TRANSDUCER III');
+    box(M, y, IW, 86, 'Frecuencia', f.variador.hz, 'Hz');
+    y += 86;
+    sec('AGUJAS','Herramientas: casquillo, cuchilla y cuello','Para el cambio de formato');
+    const cwid = 230, c0 = M+120;
+    ['CASQUILLO','CUCHILLA','ALTURA CUELLO'].forEach((l,k)=>T(l, c0+k*(cwid+12)+cwid/2, y+14, '700 17px '+FD, C.steel, 'center')); y += 22;
+    [['Molde L',f.agujas.L],['Molde R',f.agujas.R]].forEach(([n,a])=>{
+      T(n, M, y+32, '600 20px '+FM, C.ink);
+      [a.casquillo,a.cuchilla,a.cuello].forEach((v,k)=>{ const x=c0+k*(cwid+12); if(v!==null&&v!==undefined){ B(x,y,cwid,46,C.ink,2); T(num(v),x+cwid/2,y+32,'600 22px '+FM,C.ink,'center'); } else { B(x,y,cwid,46,C.steel,2,[8,6]); T('por colocar',x+cwid/2,y+29,'400 16px '+FM,C.steel,'center'); } });
+      y += 56;
+    });
+    y += 4;
   } else {
     sec('PANTALLA TIME 1','Tiempos del ciclo','A escala del ciclo de '+f.ciclo+' s');
     const lbW=190, vlW=170, bx=M+lbW+10, bw=IW-lbW-vlW-20, max=f.ciclo;
@@ -1233,19 +1408,21 @@ function paint(ctx, draw, f, img){
 /* ---------- arranque con carga desde Google Sheets ---------- */
 async function init(){
   try {
-    const [recetas, qcmRows, bekumRows] = await Promise.all([
+    const [recetas, qcmRows, bekumRows, qcm75Rows] = await Promise.all([
       fetchCsv(URL_RECETAS),
       fetchCsv(URL_QCM),
-      fetchCsv(URL_BEKUM)
+      fetchCsv(URL_BEKUM),
+      fetchCsv(URL_QCM75)
     ]);
     const qMap = new Map(qcmRows.filter(r => r.id).map(r => [String(r.id).trim(), r]));
     const bMap = new Map(bekumRows.filter(r => r.id).map(r => [String(r.id).trim(), r]));
+    const q75Map = new Map(qcm75Rows.filter(r => r.id).map(r => [String(r.id).trim(), r]));
     FICHAS = recetas
       .filter(r => r.id && String(r.id).trim() !== '')
-      .map(r => buildFicha(r, qMap, bMap));
+      .map(r => buildFicha(r, qMap, bMap, q75Map));
     route();
   } catch (err) {
-    $('#app').innerHTML = `<div class="empty">No se pudieron cargar las recetas desde Google Sheets. Verifica tu conexión a internet o que las 3 pestañas estén publicadas en la web.</div>`;
+    $('#app').innerHTML = `<div class="empty">No se pudieron cargar las recetas desde Google Sheets. Verifica tu conexión a internet o que las 4 pestañas estén publicadas en la web.</div>`;
   }
 }
 init();
