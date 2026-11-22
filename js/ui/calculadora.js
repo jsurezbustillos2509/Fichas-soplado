@@ -50,11 +50,10 @@ export function renderOperador(f) {
       <div class="calc-controls">
         <button class="pill-btn" type="button" data-hrs="1">1 h</button>
         <button class="pill-btn" type="button" data-hrs="4">4 h</button>
-        <button class="pill-btn active" type="button" data-hrs="8">8 h (Turno)</button>
-        <button class="pill-btn" type="button" data-hrs="12">12 h</button>
+        <button class="pill-btn active" type="button" data-hrs="7.2">7.2 h (Turno)</button>
         <label style="display:flex;align-items:center;gap:8px;margin-left:auto;font-family:var(--font-display);font-weight:700;text-transform:uppercase">
           Horas:
-          <input class="calc-input" id="op-hrs" type="number" min="0.5" max="24" step="0.5" value="8">
+          <input class="calc-input" id="op-hrs" type="number" min="0.1" max="24" step="0.1" value="7.2">
         </label>
       </div>
       <div class="mix-grid">
@@ -92,7 +91,7 @@ export function bindOperador(f) {
     const totalKg = f.pesoG > 0 ? (totalEnv * f.pesoG) / 1000 : 0;
 
     $("#op-res-bolsas", box).innerHTML = f.envasesPorBolsa > 0
-      ? `${n1(totalBolsas)} <small>bolsas</small>`
+      ? `${Math.floor(totalBolsas).toLocaleString("es-ES")} <small>bolsas</small>`
       : `<small>falta env/bolsa</small>`;
     $("#op-res-env", box).innerHTML = s.teorico > 0
       ? `${totalEnv.toLocaleString("es-ES")} <small>env.</small>`
@@ -101,7 +100,7 @@ export function bindOperador(f) {
       ? `${n1(totalKg)} <small>kg</small>`
       : `<small>por anotar</small>`;
 
-    btns.forEach((b) => b.classList.toggle("active", Number(b.dataset.hrs) === h));
+    btns.forEach((b) => b.classList.toggle("active", Math.abs(Number(b.dataset.hrs) - h) < 0.01));
   };
 
   btns.forEach((b) => b.addEventListener("click", () => {
@@ -109,7 +108,7 @@ export function bindOperador(f) {
     update(b.dataset.hrs);
   }));
   input.addEventListener("input", () => update(input.value));
-  update(8);
+  update(7.2);
 }
 
 // ================= VISTA MOLINERO =================
