@@ -46,7 +46,7 @@ export async function loadRecetas() {
     .filter((r) => r.id && String(r.id).trim() !== "")
     .map((r) => ({
       id: String(r.id || "").trim(),
-      layout: String(r.layout || "qcm").trim().toLowerCase(),
+      layout: String(r.layout || "").trim().toLowerCase(),
       sku: String(r.sku || "").trim(),
       desc: String(r.desc || "").trim(),
       maquina: String(r.maquina || "").trim(),
@@ -98,7 +98,7 @@ export async function loadRecetas() {
 
 // 2) Carga bajo demanda la hoja específica de una HMI y devuelve la fila de ese ID
 export async function loadHmiRow(layout, id) {
-  const key = String(layout || "qcm").toLowerCase();
+  const key = String(layout || "").trim().toLowerCase();
   const url = HMI_URLS[key];
   if (!url) return null;
 

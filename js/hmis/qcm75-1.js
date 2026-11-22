@@ -1,7 +1,7 @@
 import { toNum, strOrNull } from "../datos.js";
 import { secH, num, bloqueBarrasSimples, bloqueTablasLR, bloquePQ2, bloqueTarjetas, bloqueAgujasLR } from "../ui/bloques.js";
 
-export function renderQCM(f, q = {}) {
+export function renderQCM75_1(f, q = {}) {
   const time1 = [
     ["BLOW", toNum(q.time1_BLOW)], ["EXHAUST", toNum(q.time1_EXHAUST)],
     ["CUT", toNum(q.time1_CUT)], ["HEAD LIFT", toNum(q.time1_HEAD_LIFT)],
