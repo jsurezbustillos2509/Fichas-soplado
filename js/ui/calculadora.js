@@ -1,5 +1,15 @@
 import { $, esc, num, n1, stats, secH } from "./bloques.js";
 
+// Destello breve en resultados recalculados
+function flash(...els) {
+  els.forEach((el) => {
+    if (!el) return;
+    el.classList.remove("qty-flash");
+    void el.offsetWidth;
+    el.classList.add("qty-flash");
+  });
+}
+
 // ================= VISTA OPERADOR =================
 
 export function renderOperador(f) {
@@ -84,31 +94,36 @@ export function bindOperador(f) {
   const input = $("#op-hrs", box);
   const btns = [...box.querySelectorAll("[data-hrs]")];
 
-  const update = (hrs) => {
+  const elBolsas = $("#op-res-bolsas", box);
+  const elEnv = $("#op-res-env", box);
+  const elKg = $("#op-res-kg", box);
+
+  const update = (hrs, animar = true) => {
     const h = Math.max(0, Number(hrs) || 0);
     const totalEnv = Math.round(s.teorico * h);
     const totalBolsas = f.envasesPorBolsa > 0 ? totalEnv / f.envasesPorBolsa : 0;
     const totalKg = f.pesoG > 0 ? (totalEnv * f.pesoG) / 1000 : 0;
 
-    $("#op-res-bolsas", box).innerHTML = f.envasesPorBolsa > 0
+    elBolsas.innerHTML = f.envasesPorBolsa > 0
       ? `${Math.floor(totalBolsas).toLocaleString("es-ES")} <small>bolsas</small>`
       : `<small>falta env/bolsa</small>`;
-    $("#op-res-env", box).innerHTML = s.teorico > 0
+    elEnv.innerHTML = s.teorico > 0
       ? `${totalEnv.toLocaleString("es-ES")} <small>env.</small>`
       : `<small>por anotar</small>`;
-    $("#op-res-kg", box).innerHTML = f.pesoG > 0 && s.teorico > 0
+    elKg.innerHTML = f.pesoG > 0 && s.teorico > 0
       ? `${n1(totalKg)} <small>kg</small>`
       : `<small>por anotar</small>`;
 
     btns.forEach((b) => b.classList.toggle("active", Math.abs(Number(b.dataset.hrs) - h) < 0.01));
+    if (animar) flash(elBolsas, elEnv, elKg);
   };
 
   btns.forEach((b) => b.addEventListener("click", () => {
     input.value = b.dataset.hrs;
-    update(b.dataset.hrs);
+    update(b.dataset.hrs, true);
   }));
-  input.addEventListener("input", () => update(input.value));
-  update(7.2);
+  input.addEventListener("input", () => update(input.value, true));
+  update(7.2, false);
 }
 
 // ================= VISTA MOLINERO =================
@@ -259,6 +274,9 @@ export function bindMolinero(f) {
     $("#mol-total", box).innerHTML = `Proporción activa: <b>${Math.round(ratio * 100)}%</b> de una preparada base · Peso total aprox. de la mezcla: <b>${minM !== null && maxM !== null ? `${n1(totMin)} a ${n1(totMax)}` : n1(totMin)} kg</b>${refTurnoTxt || "."}`;
 
     btns.forEach((b) => b.classList.toggle("active", Math.abs(Number(b.dataset.mult) - ratio) < 0.01));
+    if (origen !== "init" && origen !== "slider") {
+      flash($("#mol-q-mp1", box), elMp2, elMaster, elMolido);
+    }
   };
 
   btns.forEach((b) => b.addEventListener("click", () => {
@@ -268,6 +286,10 @@ export function bindMolinero(f) {
 
   slider.addEventListener("input", () => {
     update(slider.value, "slider");
+  });
+
+  slider.addEventListener("change", () => {
+    flash($("#mol-q-mp1", box), $("#mol-q-mp2", box), $("#mol-q-master", box), $("#mol-q-molido", box));
   });
 
   input.addEventListener("input", () => {

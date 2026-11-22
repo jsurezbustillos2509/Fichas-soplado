@@ -112,6 +112,10 @@ export function renderFicha(f, hmiRow) {
       bindOperador(f);
       bindMolinero(f);
     }
+
+    box.classList.remove("role-anim");
+    void box.offsetWidth;
+    box.classList.add("role-anim");
   };
 
   $("#role-bar").addEventListener("click", (e) => {

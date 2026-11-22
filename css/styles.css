@@ -243,4 +243,34 @@ h1,h2{margin:0}
   .ticks span:nth-child(even){display:none}
 }
 @media (max-width:360px){ .pq2{grid-template-columns:minmax(0,1fr)} }
+
+/* Micro-animaciones y transiciones suaves (Bloque 3) */
+@keyframes fadeSlideUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes barGrow{
+  from{transform:scaleX(0)}
+  to{transform:scaleX(1)}
+}
+@keyframes lcdBoot{
+  from{opacity:0;transform:scale(.94)}
+  to{opacity:1;transform:scale(1)}
+}
+@keyframes qtyFlash{
+  0%{color:var(--yellow);transform:scale(1.04)}
+  100%{color:var(--ink);transform:scale(1)}
+}
+
+.role-anim{animation:fadeSlideUp .35s cubic-bezier(.22,1,.36,1) both}
+.fill{transform-origin:left center;animation:barGrow .42s cubic-bezier(.22,1,.36,1) both}
+.lcd{animation:lcdBoot .38s cubic-bezier(.22,1,.36,1) both}
+.mix-card{transition:border-color .3s ease,box-shadow .3s ease}
+.mix-card .qty{transform-origin:left center}
+.qty-flash{animation:qtyFlash .38s ease-out}
+
+/* Respuesta táctil física en celular y PC */
+.btn,.role-btn,.pill-btn,.card{transition:transform .18s cubic-bezier(.22,1,.36,1),background-color .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease}
+.btn:active,.role-btn:active,.pill-btn:active,.card:active{transform:scale(.97)}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
