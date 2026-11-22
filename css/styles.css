@@ -29,7 +29,9 @@ button,input,select{font:inherit;color:inherit}
 .stripe{height:14px;background:repeating-linear-gradient(-45deg,var(--yellow) 0 14px,#14181B 14px 28px)}
 .topbar{background:var(--plate-bg);color:var(--plate-fg)}
 .barin{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
-.brand{display:flex;flex-direction:column;min-width:0}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-logo{width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.brand-txt{display:flex;flex-direction:column;min-width:0}
 .brand b{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:.04em;text-transform:uppercase;line-height:1.05}
 .brand span{font-family:var(--font-data);font-size:13px;color:var(--plate-mute)}
 .btn{min-height:44px;padding:8px 16px;border:2px solid var(--edge);background:var(--panel);color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border-radius:0;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
@@ -225,6 +227,7 @@ h1,h2{margin:0}
   .zones{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-width:640px){
+  .brand-logo{width:38px;height:38px}
   .filters{grid-template-columns:minmax(0,1fr)}
   .role-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
   .role-btn{border-bottom:1px solid var(--line)}

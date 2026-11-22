@@ -1,0 +1,23 @@
+{
+  "name": "Fichas de Proceso Soplado",
+  "short_name": "SOPLADO",
+  "description": "Fichas técnicas, metas de turno y parámetros HMI de soplado PEAD.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#101316",
+  "theme_color": "#101316",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
