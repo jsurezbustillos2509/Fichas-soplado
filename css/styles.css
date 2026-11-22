@@ -80,7 +80,9 @@ h1,h2{margin:0}
 .kicker{font-family:var(--font-data);font-size:13px;color:var(--plate-mute);letter-spacing:.06em;text-transform:uppercase}
 .sku-big{font-family:var(--font-data);font-weight:600;font-size:clamp(30px,7vw,46px);color:var(--yellow);line-height:1.05;word-break:break-word}
 .desc-big{font-family:var(--font-display);font-weight:700;font-size:clamp(22px,4.6vw,32px);text-transform:uppercase;line-height:1.08;text-wrap:balance}
-.lcd{grid-area:lcd;background:var(--lcd-bg);border:3px solid var(--lcd-edge);padding:10px 18px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:170px}
+.lcds{grid-area:lcd;display:flex;gap:12px;align-items:stretch}
+.lcd{background:var(--lcd-bg);border:3px solid var(--lcd-edge);padding:10px 18px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:155px}
+.lcd[hidden]{display:none}
 .lcd small{font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.14em;color:var(--plate-mute);text-transform:uppercase}
 .lcd .dig{font-family:var(--font-data);font-weight:600;font-size:clamp(64px,14vw,92px);line-height:1;color:var(--yellow);text-shadow:0 0 14px rgba(255,196,0,.35);font-variant-numeric:tabular-nums}
 .lcd .u{font-family:var(--font-data);font-size:14px;color:var(--plate-mute)}
@@ -228,6 +230,7 @@ h1,h2{margin:0}
   .role-btn{border-bottom:1px solid var(--line)}
   .plate{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"foto info" "lcd lcd";gap:14px}
   .foto{width:92px}
+  .lcds{flex-direction:column;gap:10px}
   .lcd{flex-direction:row;gap:12px;justify-content:space-between;align-items:baseline;min-width:0}
   .foot{grid-template-columns:minmax(0,1fr);justify-items:start}
   .sec{padding:0 14px 18px}

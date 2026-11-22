@@ -50,10 +50,17 @@ export function renderFicha(f, hmiRow) {
             <span class="chip out" style="color:var(--plate-fg);border-color:var(--plate-mute)">${moldesTxt(f)}</span>
           </div>
         </div>
-        <div class="lcd">
-          <small>${esc(f.cicloTipo || "Ciclo real")}</small>
-          <span class="dig">${num(f.ciclo)}</span>
-          <span class="u">segundos</span>
+        <div class="lcds">
+          <div class="lcd" id="lcd-meta">
+            <small>Meta</small>
+            <span class="dig">${f.bolsas > 0 ? Math.floor(f.bolsas) : "—"}</span>
+            <span class="u">bolsas</span>
+          </div>
+          <div class="lcd">
+            <small>${esc(f.cicloTipo || "Ciclo real")}</small>
+            <span class="dig">${num(f.ciclo)}</span>
+            <span class="u">segundos</span>
+          </div>
         </div>
       </div>
 
@@ -88,6 +95,8 @@ export function renderFicha(f, hmiRow) {
     document.querySelectorAll("#role-bar .role-btn").forEach((b) => {
       b.classList.toggle("active", b.dataset.role === role);
     });
+    const showMeta = role === "operador" || role === "todo";
+    $("#lcd-meta").hidden = !showMeta;
 
     const box = $("#role-content");
     if (role === "operador") {
