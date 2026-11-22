@@ -400,4 +400,11 @@ h1,h2{margin:0}
   .av-counter-row{grid-template-columns:56px minmax(0,1fr) minmax(120px,1.25fr)}
 }
 
+/* Bloque 6: Optimización de imágenes y recuadro "Sin foto" */
+.card .ph{min-height:132px}
+.card .ph img,.foto img{display:block;object-fit:contain}
+.card .ph.ph-empty,.foto.ph-empty{background:var(--panel-2);color:var(--steel);font-family:var(--font-data);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+.ph-empty span{border:1px dashed var(--steel);padding:6px 8px;line-height:1.2}
+.foto.ph-empty{min-height:140px}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

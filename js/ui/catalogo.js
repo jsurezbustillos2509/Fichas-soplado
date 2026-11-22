@@ -25,10 +25,13 @@ export function renderCatalog(fichas) {
     );
     $("#count").textContent = `${list.length} ${list.length === 1 ? "ficha" : "fichas"} de ${fichas.length}`;
     $("#cards").innerHTML = list.length
-      ? list.map((f) => {
+      ? list.map((f, idx) => {
           const s = stats(f);
+          const fotoHtml = f.foto
+            ? `<div class="ph"><img src="${esc(f.foto)}" alt="Envase ${esc(f.desc)}" loading="${idx < 4 ? "eager" : "lazy"}"${idx < 2 ? ' fetchpriority="high"' : ""} decoding="async"></div>`
+            : `<div class="ph ph-empty"><span>Sin foto</span></div>`;
           return `<a class="card" href="#${esc(f.id)}">
-            <div class="ph"><img src="${esc(f.foto)}" alt="Envase ${esc(f.desc)}" loading="lazy"></div>
+            ${fotoHtml}
             <div class="body">
               <div class="sku">${esc(f.sku)}</div>
               <div class="desc">${esc(f.desc)}</div>
@@ -46,6 +49,17 @@ export function renderCatalog(fichas) {
         }).join("")
       : `<div class="empty">Ninguna ficha coincide con el filtro. Prueba con otra máquina o borra la búsqueda.</div>`;
   };
+
+  // Poka-Yoke: si una URL de foto falla o no existe, muestra "SIN FOTO"
+  $("#cards").addEventListener("error", (e) => {
+    const img = e.target;
+    if (img.tagName !== "IMG") return;
+    const ph = img.parentElement;
+    if (ph) {
+      ph.classList.add("ph-empty");
+      ph.innerHTML = "<span>Sin foto</span>";
+    }
+  }, true);
 
   $("#f-maq").addEventListener("change", (e) => { filt.maq = e.target.value; draw(); });
   $("#f-q").addEventListener("input", (e) => { filt.q = e.target.value; draw(); });

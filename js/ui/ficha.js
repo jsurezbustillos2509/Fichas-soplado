@@ -42,7 +42,9 @@ export function renderFicha(f, hmiRow) {
       <div class="stripe"></div>
 
       <div class="plate">
-        <div class="foto"><img src="${esc(f.foto)}" alt="Envase ${esc(f.desc)}"></div>
+        ${f.foto
+          ? `<div class="foto"><img src="${esc(f.foto)}" alt="Envase ${esc(f.desc)}" fetchpriority="high" decoding="async"></div>`
+          : `<div class="foto ph-empty"><span>Sin foto</span></div>`}
         <div class="info">
           <div class="kicker">Ficha de proceso · Soplado PEAD · <span class="role-badge" id="role-badge"></span></div>
           <div class="sku-big">${esc(f.sku)}</div>
@@ -87,6 +89,17 @@ export function renderFicha(f, hmiRow) {
 
       <div class="stripe"></div>
     </article>`;
+
+  const fotoImg = $("#sheet .foto img");
+  if (fotoImg) {
+    fotoImg.addEventListener("error", () => {
+      const box = fotoImg.parentElement;
+      if (box) {
+        box.classList.add("ph-empty");
+        box.innerHTML = "<span>Sin foto</span>";
+      }
+    });
+  }
 
   const paintRole = (role) => {
     activeRole = role;
