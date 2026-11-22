@@ -3,6 +3,7 @@ import { renderHmiBody } from "../hmis/index.js";
 import { $, esc, num, dateEs, moldesTxt, toast } from "./bloques.js";
 import { renderOperador, bindOperador, renderMolinero, bindMolinero } from "./calculadora.js";
 import { renderCronoPanel, bindCronoPanel } from "./cronometro.js";
+import { renderAvanceTurno, bindAvanceTurno } from "./avance.js";
 import { saveImage } from "./exportar.js";
 
 const ROLES = [
@@ -101,9 +102,10 @@ export function renderFicha(f, hmiRow) {
 
     const box = $("#role-content");
     if (role === "operador") {
-      box.innerHTML = renderCronoPanel(f) + renderOperador(f);
+      box.innerHTML = renderCronoPanel(f) + renderOperador(f) + renderAvanceTurno(f);
       bindCronoPanel(f);
       bindOperador(f);
+      bindAvanceTurno(f);
     } else if (role === "mecanico") {
       box.innerHTML = renderHmiBody(f, hmiRow);
     } else if (role === "molinero") {

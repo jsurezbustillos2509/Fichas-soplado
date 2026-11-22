@@ -349,4 +349,55 @@ h1,h2{margin:0}
   .crono-done-acts{grid-template-columns:1fr}
 }
 
+/* Bloque 5: Control de avance del turno (Operador) */
+.avance-acc{margin-top:22px}
+.avance-sum{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;background:var(--plate-bg);color:var(--plate-fg);padding:10px 12px;cursor:pointer;list-style:none;user-select:none}
+.avance-sum::-webkit-details-marker{display:none}
+.avance-sum .tag{background:var(--yellow);color:var(--on-yellow);font-family:var(--font-data);font-weight:600;font-size:14px;padding:2px 8px;letter-spacing:.04em}
+.avance-sum h2{font-family:var(--font-display);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.04em}
+.avance-badge{margin-left:auto;font-family:var(--font-data);font-size:13px;color:var(--plate-mute)}
+.avance-chev{font-size:18px;color:var(--yellow);transition:transform .25s ease;line-height:1}
+.avance-acc[open] .avance-chev{transform:rotate(180deg)}
+
+.avance-body{margin-top:0;border-top:none;display:flex;flex-direction:column;gap:14px}
+.av-times{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.av-tfield{display:flex;flex-direction:column;gap:4px;min-width:0}
+.av-tfield label{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--steel)}
+.av-trow{display:flex;gap:6px;align-items:stretch}
+.av-time-in{flex:1;min-width:0;min-height:44px;padding:6px 10px;border:2px solid var(--edge);background:var(--panel);font-family:var(--font-data);font-size:18px;font-weight:600}
+.av-now{min-height:44px;padding:6px 10px;font-size:13px;white-space:nowrap}
+
+.av-opts{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding:8px 10px;background:var(--panel);border:1px solid var(--line)}
+.av-check{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer}
+.av-check input{width:20px;height:20px;accent-color:var(--yellow);cursor:pointer}
+.av-eff{font-family:var(--font-data);font-size:13px;color:var(--steel)}
+
+.av-counter{display:flex;flex-direction:column;gap:8px}
+.av-counter-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.av-clabel{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.av-reset{background:none;border:none;padding:4px 6px;font-family:var(--font-data);font-size:13px;color:var(--alert);text-decoration:underline;cursor:pointer}
+.av-counter-row{display:grid;grid-template-columns:64px minmax(0,1fr) minmax(130px,1.3fr);gap:8px;align-items:stretch}
+.av-step-btn{min-height:54px;font-size:22px;padding:0}
+.av-bolsas-in{width:100%;min-height:54px;text-align:center;font-size:26px}
+.av-plus-btn{min-height:54px;font-size:21px;letter-spacing:.05em}
+
+.av-prog-wrap{background:var(--panel);border:2px solid var(--edge);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.av-prog-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-family:var(--font-display);font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.04em}
+.av-prog-head b{font-family:var(--font-data);font-size:22px;font-variant-numeric:tabular-nums}
+.av-prog-track{position:relative;height:22px;background:var(--panel-2);border:1px solid var(--edge);overflow:hidden}
+.av-prog-fill{height:100%;width:0%;background:var(--yellow);transition:width .38s cubic-bezier(.22,1,.36,1),background-color .25s ease}
+.av-prog-fill.ok{background:var(--ok)}
+.av-prog-fill.warn{background:var(--yellow)}
+.av-prog-fill.bad{background:var(--alert)}
+.av-prog-mark{position:absolute;top:0;bottom:0;width:3px;background:var(--ink);transform:translateX(-50%);box-shadow:0 0 0 1px var(--panel)}
+.av-prog-rem{margin:0;font-size:14px;color:var(--steel)}
+
+.av-andon{margin-top:0}
+
+@media (max-width:640px){
+  .av-times{grid-template-columns:1fr}
+  .avance-badge{margin-left:0;flex-basis:100%}
+  .av-counter-row{grid-template-columns:56px minmax(0,1fr) minmax(120px,1.25fr)}
+}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
