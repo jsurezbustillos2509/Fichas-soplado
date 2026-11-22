@@ -134,17 +134,15 @@ export function renderMolinero(f) {
     ${secH("PREPARADA / MOLINO", "Calculadora interactiva de mezcla", `Base estándar: ${num(baseKg)} kg de ${esc(p.mp1.nombre || "MP1")}`)}
     <div class="calc-box" id="mol-calc">
       <div class="calc-controls">
-        <button class="pill-btn" type="button" data-mult="0.5">½ tanda</button>
-        <button class="pill-btn active" type="button" data-mult="1">1 tanda (Base)</button>
-        <button class="pill-btn" type="button" data-mult="2">2 tandas</button>
-        <button class="pill-btn" type="button" data-mult="3">3 tandas</button>
+        <button class="pill-btn" type="button" data-mult="0.5">½ preparada</button>
+        <button class="pill-btn active" type="button" data-mult="1">1 preparada (Base)</button>
         <label style="display:flex;align-items:center;gap:8px;margin-left:auto;font-family:var(--font-display);font-weight:700;text-transform:uppercase">
           ${esc(p.mp1.nombre || "MP1")} (kg):
           <input class="calc-input" id="mol-mp1" type="number" min="0" step="0.5" value="${baseKg}">
         </label>
       </div>
 
-      <input class="calc-slider" id="mol-slider" type="range" min="0" max="${baseKg * 3}" step="0.5" value="${baseKg}" aria-label="Ajustar kilos de materia prima principal">
+      <input class="calc-slider" id="mol-slider" type="range" min="0" max="${baseKg}" step="0.5" value="${baseKg}" aria-label="Ajustar kilos de materia prima principal">
 
       <div class="mix-grid">
         <div class="mix-card hi">
@@ -188,6 +186,22 @@ export function bindMolinero(f) {
   const slider = $("#mol-slider", box);
   const btns = [...box.querySelectorAll("[data-mult]")];
 
+  // Referencia operativa: cuántas preparadas base cubren 1 turno (7.2 h)
+  const s = stats(f);
+  const kgTurno = f.pesoG > 0 && s.teorico > 0 ? (Math.round(s.teorico * 7.2) * f.pesoG) / 1000 : 0;
+  const baseSinMolido = baseKg + (p.mp2.kg || 0) + (p.master.gr || 0) / 1000;
+  const pesoBaseMin = baseSinMolido + (p.molido.minKg || 0);
+  const pesoBaseMax = baseSinMolido + (p.molido.maxKg ?? p.molido.minKg ?? 0);
+  let refTurnoTxt = "";
+  if (kgTurno > 0 && pesoBaseMin > 0) {
+    const prepMin = kgTurno / pesoBaseMax;
+    const prepMax = kgTurno / pesoBaseMin;
+    const rangoPrep = Math.abs(prepMax - prepMin) >= 0.05
+      ? `${n1(prepMin)} a ${n1(prepMax)}`
+      : n1(prepMin);
+    refTurnoTxt = ` · Turno 7.2 h (${n1(kgTurno)} kg): aprox. <b>${rangoPrep} preparadas</b>.`;
+  }
+
   const update = (kgActual) => {
     const kg = Math.max(0, Number(kgActual) || 0);
     const ratio = kg / baseKg;
@@ -213,11 +227,11 @@ export function bindMolinero(f) {
       else elMolido.innerHTML = `${n1(minM ?? maxM ?? 0)} <small>kg</small>`;
     }
 
-    // Peso total aproximado de la tanda
+    // Peso total aproximado de la preparada
     const baseTotal = kg + kgMp2 + grMaster / 1000;
     const totMin = baseTotal + (minM || 0);
     const totMax = baseTotal + (maxM ?? minM ?? 0);
-    $("#mol-total", box).innerHTML = `Proporción activa: <b>${Math.round(ratio * 100)}%</b> de una tanda base · Peso total aprox. de la mezcla: <b>${minM !== null && maxM !== null ? `${n1(totMin)} a ${n1(totMax)}` : n1(totMin)} kg</b>.`;
+    $("#mol-total", box).innerHTML = `Proporción activa: <b>${Math.round(ratio * 100)}%</b> de una preparada base · Peso total aprox. de la mezcla: <b>${minM !== null && maxM !== null ? `${n1(totMin)} a ${n1(totMax)}` : n1(totMin)} kg</b>${refTurnoTxt || "."}`;
 
     btns.forEach((b) => b.classList.toggle("active", Math.abs(Number(b.dataset.mult) - ratio) < 0.01));
   };
