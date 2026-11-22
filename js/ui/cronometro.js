@@ -29,6 +29,25 @@ function clearCiclo(id) {
   try { localStorage.removeItem(`fp-ciclo-${id}`); } catch (e) {}
 }
 
+// Caché temporal de ciclos en curso (no se pierden al reiniciar el reloj para el siguiente ciclo)
+function loadDraft(id) {
+  try {
+    const raw = sessionStorage.getItem(`fp-ciclo-draft-${id}`);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.map(Number).filter((v) => v > 0) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveDraft(id, vueltas) {
+  try { sessionStorage.setItem(`fp-ciclo-draft-${id}`, JSON.stringify(vueltas)); } catch (e) {}
+}
+
+function clearDraft(id) {
+  try { sessionStorage.removeItem(`fp-ciclo-draft-${id}`); } catch (e) {}
+}
+
 function formatHora(ts) {
   if (!ts) return "";
   const d = new Date(ts);
@@ -151,8 +170,8 @@ function buildGuiaAnimada() {
         </svg>
         <ol class="crono-steps">
           <li>Mira un punto fijo (ej. <b>cuando cierra el molde</b>).</li>
-          <li>Toca <b>MEDIR</b> justo en ese instante.</li>
-          <li>Opcional: toca <b>+ REGISTRAR CICLO</b> en cada cierre para promediar, y <b>PARAR</b> al terminar.</li>
+          <li>Toca <b>MEDIR</b> justo en ese instante y <b>PARAR</b> al completarse.</li>
+          <li>Para promediar: toca <b>+ REGISTRAR CICLO</b> sin parar, o pulsa <b>PARAR</b> y luego <b>+ MEDIR OTRO CICLO</b>.</li>
         </ol>
       </div>
     </details>`;
@@ -198,7 +217,8 @@ function openCronoModal(f, onSaved) {
   let estado = "idle"; // idle | running | done
   let lapStart = 0;
   let rafId = null;
-  let vueltas = [];
+  let vieneDeLap = false;
+  let vueltas = loadDraft(f.id);
   let promedioActual = 0;
 
   ov.innerHTML = `
@@ -225,12 +245,13 @@ function openCronoModal(f, onSaved) {
 
         <div class="crono-controls" id="crono-ctrl-run">
           <button class="btn solid crono-main-btn" id="crono-main" type="button">MEDIR</button>
-          <button class="btn crono-lap-btn" id="crono-lap" type="button" hidden>+ REGISTRAR CICLO (PROMEDIO)</button>
+          <button class="btn crono-lap-btn" id="crono-lap" type="button" hidden>+ REGISTRAR CICLO (SEGUIR)</button>
         </div>
 
         <div class="crono-done-acts" id="crono-ctrl-done" hidden>
           <button class="btn solid crono-save-btn" id="crono-save" type="button">GUARDAR</button>
-          <button class="btn crono-retry-btn" id="crono-retry" type="button">VOLVER A MEDIR</button>
+          <button class="btn crono-next-btn" id="crono-next" type="button">+ MEDIR OTRO CICLO</button>
+          <button class="btn crono-retry-btn" id="crono-retry" type="button">REINICIAR</button>
         </div>
       </div>
     </div>`;
@@ -243,6 +264,12 @@ function openCronoModal(f, onSaved) {
   const elLap = $("#crono-lap", ov);
   const elCtrlRun = $("#crono-ctrl-run", ov);
   const elCtrlDone = $("#crono-ctrl-done", ov);
+
+  const flashDig = () => {
+    elDig.classList.remove("qty-flash");
+    void elDig.offsetWidth;
+    elDig.classList.add("qty-flash");
+  };
 
   const stopLoop = () => {
     if (rafId !== null) {
@@ -263,7 +290,10 @@ function openCronoModal(f, onSaved) {
       <div class="laps-list">
         ${vueltas.map((v, i) => `<span class="lap-chip">C${i + 1}: <b>${n1(v)} s</b></span>`).join("")}
       </div>
-      ${vueltas.length > 1 ? `<div class="laps-avg">Promedio actual: <b>${n1(avg)} s</b></div>` : ""}`;
+      <div class="laps-foot">
+        <span class="laps-avg">${vueltas.length > 1 ? `Promedio actual: <b>${n1(avg)} s</b>` : "1 ciclo en memoria (listo para promediar)"}</span>
+        ${estado === "idle" ? `<button class="lap-clear" type="button" data-lap-clear>Limpiar</button>` : ""}
+      </div>`;
   };
 
   const tick = () => {
@@ -276,7 +306,7 @@ function openCronoModal(f, onSaved) {
   const start = () => {
     vib(30);
     estado = "running";
-    vueltas = [];
+    vieneDeLap = false;
     lapStart = performance.now();
     elPreview.hidden = true;
     elCtrlDone.hidden = true;
@@ -285,7 +315,7 @@ function openCronoModal(f, onSaved) {
     elMain.classList.remove("solid");
     elMain.classList.add("stop");
     elLap.hidden = false;
-    elSub.textContent = "Midiendo ciclo 1...";
+    elSub.textContent = `Midiendo ciclo ${vueltas.length + 1}...`;
     renderLaps();
     tick();
   };
@@ -296,8 +326,12 @@ function openCronoModal(f, onSaved) {
     if (seg < 0.5) return;
     vib(30);
     vueltas.push(+seg.toFixed(1));
+    saveDraft(f.id, vueltas);
+    vieneDeLap = true;
     lapStart = performance.now();
-    elSub.textContent = `Midiendo ciclo ${vueltas.length + 1}...`;
+    elDig.textContent = "0,0";
+    flashDig();
+    elSub.textContent = `Ciclo ${vueltas.length} guardado · midiendo ciclo ${vueltas.length + 1}...`;
     renderLaps();
   };
 
@@ -305,17 +339,16 @@ function openCronoModal(f, onSaved) {
     if (estado !== "running") return;
     stopLoop();
     const seg = (performance.now() - lapStart) / 1000;
-    const minCola = f.ciclo > 0 ? Math.max(2, f.ciclo * 0.4) : 2;
 
-    if (vueltas.length === 0) {
-      if (seg < 0.5) {
-        reset();
-        toast("Medición muy corta, intenta de nuevo");
-        return;
-      }
+    if (vieneDeLap && seg < 2) {
+      // Si acaba de registrar una vuelta continua y pulsa PARAR enseguida, no suma esos milisegundos sobrantes
+    } else if (seg >= 0.5) {
       vueltas.push(+seg.toFixed(1));
-    } else if (seg >= minCola) {
-      vueltas.push(+seg.toFixed(1));
+      saveDraft(f.id, vueltas);
+    } else if (vueltas.length === 0) {
+      reset();
+      toast("Medición muy corta, intenta de nuevo");
+      return;
     }
 
     vib([35, 30, 35]);
@@ -323,9 +356,7 @@ function openCronoModal(f, onSaved) {
     promedioActual = +(vueltas.reduce((a, b) => a + b, 0) / vueltas.length).toFixed(1);
 
     elDig.textContent = n1(promedioActual);
-    elDig.classList.remove("qty-flash");
-    void elDig.offsetWidth;
-    elDig.classList.add("qty-flash");
+    flashDig();
     elSub.textContent = vueltas.length > 1
       ? `Promedio de ${vueltas.length} ciclos`
       : "Ciclo medido";
@@ -357,10 +388,31 @@ function openCronoModal(f, onSaved) {
     elCtrlDone.hidden = false;
   };
 
+  // Reinicia solo el reloj a 0,0 conservando los ciclos ya medidos en caché
+  const prepararSiguiente = () => {
+    vib(25);
+    stopLoop();
+    estado = "idle";
+    vieneDeLap = false;
+    elDig.textContent = "0,0";
+    elSub.textContent = `Listo para medir ciclo ${vueltas.length + 1}`;
+    elMain.textContent = "MEDIR";
+    elMain.classList.remove("stop");
+    elMain.classList.add("solid");
+    elLap.hidden = true;
+    elPreview.hidden = true;
+    elCtrlDone.hidden = true;
+    elCtrlRun.hidden = false;
+    renderLaps();
+  };
+
+  // Borra todo y vuelve a empezar desde cero
   const reset = () => {
     stopLoop();
     estado = "idle";
+    vieneDeLap = false;
     vueltas = [];
+    clearDraft(f.id);
     promedioActual = 0;
     elDig.textContent = "0,0";
     elSub.textContent = "Listo para medir";
@@ -391,14 +443,20 @@ function openCronoModal(f, onSaved) {
   });
 
   elLap.addEventListener("click", registrarVuelta);
+  $("#crono-next", ov).addEventListener("click", prepararSiguiente);
   $("#crono-retry", ov).addEventListener("click", reset);
   $("#crono-save", ov).addEventListener("click", () => {
     if (!promedioActual) return;
     vib([25, 40, 25]);
     saveCiclo(f.id, promedioActual, vueltas);
+    clearDraft(f.id);
     close();
     if (onSaved) onSaved();
     toast("Ciclo real guardado");
+  });
+
+  elLaps.addEventListener("click", (e) => {
+    if (e.target.closest("[data-lap-clear]")) reset();
   });
 
   $("#crono-x", ov).addEventListener("click", close);
@@ -407,4 +465,10 @@ function openCronoModal(f, onSaved) {
   });
   document.addEventListener("keydown", onKey);
   window.addEventListener("hashchange", close, { once: true });
+
+  // Si había ciclos en memoria en curso, los muestra al abrir
+  if (vueltas.length > 0) {
+    elSub.textContent = `Listo para medir ciclo ${vueltas.length + 1}`;
+    renderLaps();
+  }
 }
