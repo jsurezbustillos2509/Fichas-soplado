@@ -273,4 +273,74 @@ h1,h2{margin:0}
 .btn,.role-btn,.pill-btn,.card{transition:transform .18s cubic-bezier(.22,1,.36,1),background-color .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease}
 .btn:active,.role-btn:active,.pill-btn:active,.card:active{transform:scale(.97)}
 
+/* Bloque 4: Verificador de Ciclo Real, Guía Animada y Andon */
+.pill.warn{background:var(--yellow);color:var(--on-yellow)}
+
+.crono-strip{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--panel-2);border:2px solid var(--edge);padding:12px 14px;margin-top:16px}
+.crono-strip-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.crono-strip-txt b{font-family:var(--font-display);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.04em;line-height:1.1}
+.crono-strip-txt span{font-size:14px;color:var(--steel)}
+
+.andon{background:var(--panel-2);border:2px solid var(--edge);padding:12px 14px;margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.andon.ok{border-color:var(--ok);box-shadow:inset 6px 0 0 var(--ok)}
+.andon.warn{border-color:var(--yellow);box-shadow:inset 6px 0 0 var(--yellow)}
+.andon.bad{border-color:var(--alert);box-shadow:inset 6px 0 0 var(--alert)}
+.andon-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.andon-meta{font-family:var(--font-data);font-size:13px;color:var(--steel)}
+.andon-acts{display:flex;gap:6px;margin-left:auto}
+.andon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.andon-kpi{background:var(--panel);border:1px solid var(--line);padding:8px 12px;display:flex;flex-direction:column;gap:2px}
+.andon-kpi .k-code{font-family:var(--font-data);font-size:12px;color:var(--steel)}
+.andon-kpi .k-val{font-family:var(--font-data);font-weight:600;font-size:24px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.15}
+.andon-kpi .k-val small{font-size:14px;font-weight:500;color:var(--steel)}
+.andon-note{margin:0;font-size:14px;color:var(--steel)}
+
+/* Modal del cronómetro (no pantalla completa) */
+.crono-modal{max-width:520px;gap:12px;padding:16px}
+.crono-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.crono-head h3{margin:4px 0 0;font-family:var(--font-display);font-weight:700;font-size:24px;text-transform:uppercase;letter-spacing:.03em;line-height:1.05}
+.crono-close{color:var(--ink);border-color:var(--edge);min-width:40px;padding:4px 10px}
+
+.crono-guide{background:var(--panel-2);border:1px solid var(--line);padding:8px 10px}
+.crono-guide summary{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;color:var(--ink)}
+.crono-guide-body{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.mold-svg{width:100%;height:auto;max-height:92px;display:block}
+.crono-steps{margin:0;padding-left:18px;font-size:13px;color:var(--steel);display:flex;flex-direction:column;gap:2px}
+
+/* Animación didáctica del cierre de molde */
+@keyframes moldL{0%,18%{transform:translateX(20px)}48%,78%{transform:translateX(0)}100%{transform:translateX(20px)}}
+@keyframes moldR{0%,18%{transform:translateX(-20px)}48%,78%{transform:translateX(0)}100%{transform:translateX(-20px)}}
+@keyframes bottleGlow{0%,12%{opacity:.2}18%,42%{opacity:1}50%,100%{opacity:.2}}
+@keyframes tapRing{0%{transform:scale(.4);opacity:1}24%{transform:scale(2.1);opacity:0}25%,100%{opacity:0}}
+.mold-l{animation:moldL 3.6s ease-in-out infinite}
+.mold-r{animation:moldR 3.6s ease-in-out infinite}
+.mold-bottle{animation:bottleGlow 3.6s ease-in-out infinite}
+.mold-pulse{transform-box:fill-box;transform-origin:center;animation:tapRing 3.6s ease-out infinite}
+
+.crono-lcd{background:var(--lcd-bg);border:3px solid var(--lcd-edge);padding:14px 16px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.crono-lcd small{font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.14em;color:var(--plate-mute);text-transform:uppercase}
+.crono-lcd .dig{font-family:var(--font-data);font-weight:600;font-size:clamp(58px,15vw,84px);line-height:1;color:var(--yellow);text-shadow:0 0 14px rgba(255,196,0,.35);font-variant-numeric:tabular-nums}
+.crono-lcd .u{font-family:var(--font-data);font-size:14px;color:var(--plate-mute)}
+
+.crono-laps{background:var(--panel-2);border:1px solid var(--line);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.laps-list{display:flex;flex-wrap:wrap;gap:6px}
+.lap-chip{font-family:var(--font-data);font-size:13px;background:var(--panel);border:1px solid var(--edge);padding:2px 8px}
+.laps-avg{font-family:var(--font-data);font-size:13px;color:var(--steel)}
+
+.crono-controls{display:flex;flex-direction:column;gap:10px}
+.crono-main-btn{width:100%;min-height:68px;font-size:26px;letter-spacing:.08em}
+.crono-main-btn.stop{background:var(--alert);color:var(--on-alert);border-color:var(--alert)}
+.crono-main-btn.stop:hover{background:var(--alert);color:var(--on-alert);opacity:.92}
+.crono-lap-btn{width:100%;min-height:50px;font-size:17px}
+
+.crono-done-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crono-save-btn,.crono-retry-btn{min-height:54px;font-size:19px}
+
+@media (max-width:640px){
+  .crono-strip .btn{width:100%}
+  .andon-acts{margin-left:0;width:100%}
+  .andon-acts .pill-btn:first-child{flex:1}
+  .crono-done-acts{grid-template-columns:1fr}
+}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
