@@ -1,5 +1,5 @@
 import { URL_GUARDAR_SKU, PIN_ADMIN, GITHUB_RAW_BASE } from "../config.js";
-import { addRecetaLocal } from "../datos.js";
+import { addRecetaLocal, updateRecetaLocal } from "../datos.js";
 import { $, esc, toast } from "./bloques.js";
 
 const SESSION_KEY = "fp-admin-until";
@@ -41,7 +41,7 @@ function getHmiSections(layout) {
           ["time2_Mold_open_delay_L", "Mold open delay (L)"], ["time2_Mold_open_delay_R", "Mold open delay (R)"],
           ["time2_Pin_up_delay_L", "Pin up delay (L)"], ["time2_Pin_up_delay_R", "Pin up delay (R)"],
           ["time2_Sub_mold_delay_L", "Sub-mold delay (L)"], ["time2_Sub_mold_delay_R", "Sub-mold delay (R)"],
-          ["time2_Station_down_hold_delay_L", "Station down hold (L)"], ["time2_Station_down_hold_delay_R", "Station down hold (R)"]
+          ["time2_Station_down_hold_delay_L", "Station down hold delay (L)"], ["time2_Station_down_hold_delay_R", "Station down hold delay (R)"]
         ].map(([k, l]) => ({ key: k, label: l, type: "num" }))
       },
       {
@@ -268,15 +268,25 @@ function setUnlocked() {
   } catch (e) {}
 }
 
-export function openNewSkuFlow(fichas, onSaved) {
+function runWithAuth(fn) {
   if (isUnlocked()) {
-    openFormModal(fichas, onSaved);
+    fn();
     return;
   }
   openPinModal(() => {
     setUnlocked();
-    openFormModal(fichas, onSaved);
+    fn();
   });
+}
+
+// 1) Flujo para crear un SKU nuevo desde el catálogo
+export function openNewSkuFlow(fichas, onSaved) {
+  runWithAuth(() => openFormModal({ mode: "create", fichas, onSaved }));
+}
+
+// 2) Flujo para editar/completar un SKU existente desde su ficha
+export function openEditSkuFlow(ficha, hmiRow, onSaved) {
+  runWithAuth(() => openFormModal({ mode: "update", ficha, hmiRow: hmiRow || {}, onSaved }));
 }
 
 // ================= MODAL DE PIN (4 DÍGITOS) =================
@@ -293,7 +303,7 @@ function openPinModal(onSuccess) {
           </div>
           <button class="btn ghost crono-close" id="pin-close" type="button" aria-label="Cerrar">✕</button>
         </div>
-        <p class="note" style="margin:0">Solo personal autorizado puede registrar nuevos SKUs. La sesión quedará activa por 30 minutos.</p>
+        <p class="note" style="margin:0">Solo personal autorizado puede crear o editar SKUs. La sesión quedará activa por 30 minutos.</p>
         <form id="pin-form" class="pin-form">
           <input class="pin-input" id="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="off" required>
           <p class="pin-err" id="pin-err" hidden>PIN incorrecto. Intenta nuevamente.</p>
@@ -327,19 +337,23 @@ function openPinModal(onSuccess) {
   });
 }
 
-// ================= MODAL DE ALTA DE NUEVO SKU =================
+// ================= MODAL DE CREACIÓN / EDICIÓN DE SKU =================
 
-function openFormModal(fichas, onSaved) {
+function openFormModal(opts) {
+  const isEdit = opts.mode === "update";
+  const ficha = opts.ficha || null;
+  const hmiRow = opts.hmiRow || {};
+  const fichas = opts.fichas || [];
   const ov = $("#ovbox");
   const hoy = new Date().toISOString().slice(0, 10);
 
   ov.innerHTML = `
-    <div class="ov" id="sku-ov" role="dialog" aria-modal="true" aria-label="Agregar nuevo SKU">
+    <div class="ov" id="sku-ov" role="dialog" aria-modal="true" aria-label="${isEdit ? "Editar SKU" : "Agregar nuevo SKU"}">
       <div class="ovin sku-modal">
         <div class="crono-head">
           <div>
-            <span class="sk-tag">NUEVA FICHA DE PROCESO</span>
-            <h3>Agregar SKU a la base de datos</h3>
+            <span class="sk-tag">${isEdit ? "EDITAR / COMPLETAR FICHA" : "NUEVA FICHA DE PROCESO"}</span>
+            <h3>${isEdit ? `Editar SKU ${esc(ficha.sku)}` : "Agregar SKU a la base de datos"}</h3>
           </div>
           <button class="btn ghost crono-close" id="sku-close" type="button" aria-label="Cerrar">✕</button>
         </div>
@@ -365,15 +379,15 @@ function openFormModal(fichas, onSaved) {
             </summary>
             <div class="form-grid">
               <div class="field">
-                <label for="f-layout">Máquina * (Obligatorio)</label>
-                <select id="f-layout" name="layout" data-scope="receta" required>
+                <label for="f-layout">Máquina * ${isEdit ? "(Bloqueada)" : "(Obligatorio)"}</label>
+                <select id="f-layout" name="layout" data-scope="receta" ${isEdit ? "disabled" : "required"}>
                   <option value="">— Selecciona máquina —</option>
                   ${MAQUINAS.map((m) => `<option value="${m.layout}">${m.maquina}</option>`).join("")}
                 </select>
               </div>
               <div class="field">
-                <label for="f-sku">Código SKU * (Obligatorio)</label>
-                <input id="f-sku" name="sku" data-scope="receta" type="text" placeholder="Ej: 500128.320" autocomplete="off" required>
+                <label for="f-sku">Código SKU * ${isEdit ? "(Clave fija)" : "(Obligatorio)"}</label>
+                <input id="f-sku" name="sku" data-scope="receta" type="text" placeholder="Ej: 500128.320" autocomplete="off" ${isEdit ? "disabled" : "required"}>
               </div>
               <div class="dup-alert" id="sku-dup-alert" hidden></div>
 
@@ -518,7 +532,7 @@ function openFormModal(fichas, onSaved) {
           </div>
 
           <div class="ovb" style="margin-top:14px">
-            <button class="btn solid" style="flex:1;min-height:52px" type="submit">Revisar y guardar</button>
+            <button class="btn solid" style="flex:1;min-height:52px" type="submit">${isEdit ? "Revisar cambios" : "Revisar y guardar"}</button>
             <button class="btn" id="sku-cancel" type="button">Cancelar</button>
           </div>
         </form>
@@ -557,12 +571,13 @@ function openFormModal(fichas, onSaved) {
     $("#sku-prog-txt").textContent = `${filled} de ${total} campos llenos`;
     $("#sku-prog-fill").style.width = `${pct}%`;
 
-    const idPrev = buildSkuId(skuInput.value);
+    const idPrev = isEdit ? ficha.id : buildSkuId(skuInput.value);
     $("#sku-id-prev").textContent = idPrev ? `ID: ${idPrev}` : "ID: pendiente";
   };
 
-  // Validar duplicado en vivo
+  // Validar duplicado en vivo (solo aplica al crear nuevo)
   const checkDuplicate = () => {
+    if (isEdit) return false;
     const id = buildSkuId(skuInput.value);
     const maq = layoutSel.value;
     if (!id) {
@@ -586,8 +601,7 @@ function openFormModal(fichas, onSaved) {
   };
 
   // Dibujar secciones dinámicas al elegir máquina
-  layoutSel.addEventListener("change", () => {
-    const layout = layoutSel.value;
+  const renderHmiGrid = (layout) => {
     const info = MAQUINAS.find((m) => m.layout === layout);
     if (info && !hmiInput.value.trim()) {
       hmiInput.value = info.hmiDefault;
@@ -635,7 +649,68 @@ function openFormModal(fichas, onSaved) {
 
     checkDuplicate();
     updateProgress();
-  });
+  };
+
+  layoutSel.addEventListener("change", () => renderHmiGrid(layoutSel.value));
+
+  // Precargar valores si estamos en modo EDICIÓN
+  if (isEdit && ficha) {
+    layoutSel.value = ficha.layout;
+    skuInput.value = ficha.sku;
+    renderHmiGrid(ficha.layout);
+
+    const fotoLimpia = ficha.foto && ficha.foto.startsWith(GITHUB_RAW_BASE)
+      ? ficha.foto.slice(GITHUB_RAW_BASE.length)
+      : (ficha.foto || "");
+
+    const recetaMap = {
+      desc: ficha.desc || "",
+      hmi: ficha.hmi || "",
+      ciclo: ficha.ciclo ?? "",
+      cicloTipo: ficha.cicloTipo || "Ciclo real",
+      moldes: ficha.moldes ?? "",
+      cavidades: ficha.cavidades ?? "",
+      pesoG: ficha.pesoG ?? "",
+      envases_por_bolsa: ficha.envasesPorBolsa ?? "",
+      bolsas: ficha.bolsas ?? "",
+      bolsasPeriodo: ficha.bolsasPeriodo ?? "",
+      foto: fotoLimpia,
+      unidad_factor: ficha.unidad?.factor ?? 0.1,
+      unidad_confirmada: ficha.unidad?.confirmada ? "TRUE" : "FALSE",
+      leyenda: Array.isArray(ficha.leyenda) ? ficha.leyenda.join(" | ") : "",
+      mp1_nombre: ficha.preparada?.mp1?.nombre || "",
+      mp1_codigo: ficha.preparada?.mp1?.codigo || "",
+      mp1_kg: ficha.preparada?.mp1?.kg ?? "",
+      mp2_nombre: ficha.preparada?.mp2?.nombre || "",
+      mp2_codigo: ficha.preparada?.mp2?.codigo || "",
+      mp2_kg: ficha.preparada?.mp2?.kg ?? "",
+      master_nombre: ficha.preparada?.master?.nombre || "",
+      master_codigo: ficha.preparada?.master?.codigo || "",
+      master_gr: ficha.preparada?.master?.gr ?? "",
+      molido_min_kg: ficha.preparada?.molido?.minKg ?? "",
+      molido_max_kg: ficha.preparada?.molido?.maxKg ?? ""
+    };
+
+    Object.entries(recetaMap).forEach(([k, v]) => {
+      const el = form.querySelector(`[data-scope='receta'][name='${k}']`);
+      if (el) el.value = v !== null && v !== undefined ? String(v) : "";
+    });
+
+    form.querySelectorAll("[data-scope='hmi']").forEach((el) => {
+      const altKey = el.name.replace("inplace", "Inplace");
+      const raw = hmiRow[el.name] !== undefined ? hmiRow[el.name] : hmiRow[altKey];
+      if (raw === undefined || raw === null || String(raw).trim() === "") {
+        el.value = "";
+        return;
+      }
+      if (el.tagName === "SELECT") {
+        const up = String(raw).trim().toUpperCase();
+        el.value = up === "TRUE" || up === "FALSE" ? up : "";
+      } else {
+        el.value = String(raw).trim();
+      }
+    });
+  }
 
   skuInput.addEventListener("input", () => {
     checkDuplicate();
@@ -647,18 +722,18 @@ function openFormModal(fichas, onSaved) {
 
   // Recopilar datos del formulario
   const collectPayload = () => {
-    const layout = layoutSel.value.trim().toLowerCase();
+    const layout = isEdit ? ficha.layout : layoutSel.value.trim().toLowerCase();
     const maqObj = MAQUINAS.find((m) => m.layout === layout);
-    const sku = skuInput.value.trim();
-    const id = buildSkuId(sku);
+    const sku = isEdit ? ficha.sku : skuInput.value.trim();
+    const id = isEdit ? ficha.id : buildSkuId(sku);
 
     const receta = {
       id,
       layout,
       sku,
-      maquina: maqObj ? maqObj.maquina : layout.toUpperCase(),
+      maquina: isEdit ? ficha.maquina : (maqObj ? maqObj.maquina : layout.toUpperCase()),
       fecha: hoy,
-      version: "1.0"
+      version: isEdit ? (ficha.version || "1.0") : "1.0"
     };
     const hmi = { id, sku };
 
@@ -676,18 +751,23 @@ function openFormModal(fichas, onSaved) {
       if (el.name) hmi[el.name] = el.value.trim();
     });
 
-    return { pin: String(PIN_ADMIN), receta, hmi };
+    return {
+      action: isEdit ? "update" : "create",
+      pin: String(PIN_ADMIN),
+      receta,
+      hmi
+    };
   };
 
   // Paso previo: Pantalla de confirmación con resumen
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (!layoutSel.value) {
+    if (!isEdit && !layoutSel.value) {
       toast("Selecciona primero la máquina");
       layoutSel.focus();
       return;
     }
-    if (!skuInput.value.trim()) {
+    if (!isEdit && !skuInput.value.trim()) {
       toast("Escribe el código SKU");
       skuInput.focus();
       return;
@@ -707,20 +787,20 @@ function openFormModal(fichas, onSaved) {
     confirmBox.hidden = false;
     confirmBox.innerHTML = `
       <div class="confirm-card">
-        <span class="sk-tag">CONFIRMAR REGISTRO</span>
-        <h4 style="margin:8px 0;font-family:var(--font-display);font-size:24px;text-transform:uppercase">Resumen antes de guardar en Google Sheets</h4>
+        <span class="sk-tag">${isEdit ? "CONFIRMAR ACTUALIZACIÓN" : "CONFIRMAR REGISTRO"}</span>
+        <h4 style="margin:8px 0;font-family:var(--font-display);font-size:24px;text-transform:uppercase">${isEdit ? "Resumen de cambios antes de actualizar" : "Resumen antes de guardar en Google Sheets"}</h4>
         <div class="confirm-grid">
           <div><small>Máquina</small><b>${esc(payload.receta.maquina)}</b></div>
           <div><small>Código SKU</small><b>${esc(payload.receta.sku)}</b></div>
-          <div><small>ID generado</small><b>${esc(payload.receta.id)}</b></div>
+          <div><small>ID</small><b>${esc(payload.receta.id)}</b></div>
           <div><small>Descripción</small><b>${esc(payload.receta.desc || "Por registrar")}</b></div>
           <div><small>Campos llenos</small><b>${filledCount} de ${allInputs.length}</b></div>
           <div><small>Campos vacíos</small><b>${emptyCount} (dirán "Por registrar")</b></div>
         </div>
-        <p class="note">Se guardará simultáneamente en la pestaña <b>RECETAS</b> y en <b>${esc(payload.receta.maquina)}</b>.</p>
+        <p class="note">Se ${isEdit ? "actualizará" : "guardará"} simultáneamente en la pestaña <b>RECETAS</b> y en <b>${esc(payload.receta.maquina)}</b>.</p>
         <div id="send-status" style="margin-top:12px"></div>
         <div class="ovb" style="margin-top:14px" id="confirm-btns">
-          <button class="btn solid" style="flex:1;min-height:52px" id="btn-send-now" type="button">Guardar en Sheets</button>
+          <button class="btn solid" style="flex:1;min-height:52px" id="btn-send-now" type="button">${isEdit ? "Actualizar en Sheets" : "Guardar en Sheets"}</button>
           <button class="btn" id="btn-back-edit" type="button">Volver a editar</button>
         </div>
       </div>`;
@@ -735,7 +815,7 @@ function openFormModal(fichas, onSaved) {
       }
 
       btnsEl.querySelectorAll("button").forEach((b) => { b.disabled = true; });
-      statusEl.innerHTML = `<div class="sk-status" style="margin:0"><span class="sk-tag">ENVIANDO</span><span class="sk-status-txt">Guardando en Google Sheets<span class="sk-dots">...</span></span></div>`;
+      statusEl.innerHTML = `<div class="sk-status" style="margin:0"><span class="sk-tag">ENVIANDO</span><span class="sk-status-txt">${isEdit ? "Actualizando ficha" : "Guardando en Google Sheets"}<span class="sk-dots">...</span></span></div>`;
 
       try {
         const res = await fetch(URL_GUARDAR_SKU, {
@@ -745,14 +825,19 @@ function openFormModal(fichas, onSaved) {
         const data = await res.json();
 
         if (!data || !data.ok) {
-          throw new Error(data?.message || "El servidor rechazó el guardado.");
+          throw new Error(data?.message || "El servidor rechazó la operación.");
         }
 
-        // Inyectar al instante en el catálogo local
-        const nuevaFicha = addRecetaLocal(payload.receta, payload.hmi);
+        const fichaResult = isEdit
+          ? updateRecetaLocal(payload.receta, payload.hmi)
+          : addRecetaLocal(payload.receta, payload.hmi);
+
         close();
-        toast("SKU guardado. Puede tardar unos minutos en verse en otros celulares.");
-        if (typeof onSaved === "function") onSaved(nuevaFicha);
+        toast(isEdit
+          ? "Ficha actualizada. Los demás celulares verán el cambio en unos minutos."
+          : "SKU guardado. Puede tardar unos minutos en verse en otros celulares.");
+
+        if (typeof opts.onSaved === "function") opts.onSaved(fichaResult, payload.hmi);
 
       } catch (err) {
         btnsEl.querySelectorAll("button").forEach((b) => { b.disabled = false; });

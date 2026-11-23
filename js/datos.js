@@ -115,6 +115,19 @@ export function addRecetaLocal(rawReceta, rawHmi) {
   return mapped;
 }
 
+// Actualiza al instante una ficha editada en memoria
+export function updateRecetaLocal(rawReceta, rawHmi) {
+  const mapped = mapRecetaRow(rawReceta);
+  if (recetasCache) {
+    const idx = recetasCache.findIndex((x) => x.id === mapped.id);
+    if (idx !== -1) recetasCache[idx] = mapped;
+  }
+  if (rawHmi && mapped.id) {
+    localHmiRows.set(mapped.id, rawHmi);
+  }
+  return mapped;
+}
+
 // 1) Carga únicamente la hoja RECETAS para mostrar el catálogo al instante
 export async function loadRecetas() {
   if (recetasCache) return recetasCache;

@@ -5,6 +5,7 @@ import { renderOperador, bindOperador, renderMolinero, bindMolinero } from "./ca
 import { renderCronoPanel, bindCronoPanel } from "./cronometro.js";
 import { renderAvanceTurno, bindAvanceTurno } from "./avance.js";
 import { saveImage } from "./exportar.js";
+import { openEditSkuFlow } from "./nuevo-sku.js";
 
 const ROLES = [
   { id: "operador", label: "Operador" },
@@ -34,6 +35,7 @@ export function renderFicha(f, hmiRow) {
     <div class="nav" data-nav>
       <button class="btn" id="back" type="button">← Catálogo</button>
       <span class="sp"></span>
+      <button class="btn" id="edit-sku" type="button">Editar ficha</button>
       <button class="btn" id="copy" type="button">Copiar link</button>
       <button class="btn solid" id="img" type="button">Guardar imagen</button>
     </div>
@@ -141,6 +143,11 @@ export function renderFicha(f, hmiRow) {
   });
 
   $("#back").addEventListener("click", () => { location.hash = ""; });
+  $("#edit-sku").addEventListener("click", () => {
+    openEditSkuFlow(f, hmiRow, (updatedFicha, updatedHmi) => {
+      renderFicha(updatedFicha, updatedHmi);
+    });
+  });
   $("#copy").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(url);
