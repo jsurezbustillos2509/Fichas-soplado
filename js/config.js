@@ -17,5 +17,5 @@ export const SHARE_BASE = window.location.protocol.startsWith("http")
 
 // Configuración para agregar nuevos SKUs desde la app
 export const URL_GUARDAR_SKU = "https://script.google.com/macros/s/AKfycbw-q-WLbMF_1h5eUpzyeSz1YD1iMAW7z1t-d9oKHiVyEzbnXLTEyxRsp6eTsgRw12qC/exec";
-export const PIN_ADMIN = "1234"; // Debe coincidir con PIN_ADMIN en tu Apps Script
+export const PIN_ADMIN = "1402"; // Debe coincidir con PIN_ADMIN en tu Apps Script
 export const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/jsurezbustillos2509/Fichas-soplado/main/";
