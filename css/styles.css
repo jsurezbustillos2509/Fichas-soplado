@@ -408,3 +408,65 @@ h1,h2{margin:0}
 .foto.ph-empty{min-height:140px}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* Bloque 7: Pantallas de carga (skeleton loaders) estilo HMI */
+.sk-b{position:relative;overflow:hidden;background:var(--panel-2)}
+.sk-b::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,196,0,.28),transparent);animation:skSweep 1.4s ease-in-out infinite;animation-delay:var(--d,0ms)}
+@keyframes skSweep{to{transform:translateX(100%)}}
+
+/* Placa de estado con barra de nivel */
+.sk-status{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;background:var(--plate-bg);color:var(--plate-fg);border:2px solid var(--lcd-edge);border-left:6px solid var(--yellow);padding:10px 14px;margin-bottom:18px}
+.sk-tag{background:var(--yellow);color:var(--on-yellow);font-family:var(--font-data);font-weight:600;font-size:13px;padding:2px 8px;letter-spacing:.06em}
+.sk-status-txt{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:.06em;text-transform:uppercase}
+.sk-dots{display:inline-block;width:1.3em;overflow:hidden;vertical-align:bottom;animation:skDots 1.2s steps(4,end) infinite}
+@keyframes skDots{from{width:0}to{width:1.3em}}
+.sk-level{position:relative;flex:1 1 140px;height:14px;border:2px solid var(--plate-mute);background:var(--lcd-bg);overflow:hidden}
+.sk-level::before{content:"";position:absolute;inset:0;z-index:1;background:repeating-linear-gradient(90deg,transparent 0 9px,var(--lcd-bg) 9px 11px)}
+.sk-level-fill{position:absolute;left:0;top:0;bottom:0;width:45%;background:var(--yellow);animation:skLevel 1.8s ease-in-out infinite}
+@keyframes skLevel{0%{width:4%;opacity:1}78%{width:100%;opacity:1}100%{width:100%;opacity:.35}}
+
+/* Siluetas de envase: la capa amarilla "infla" de abajo hacia arriba */
+.sk-svg{display:block;width:56px;height:112px}
+.sk-sil{fill:#CBD2D7}
+.sk-lvl{fill:#FFC400;fill-opacity:.8;transform-box:fill-box;transform-origin:50% 100%;animation:skInflate 2.6s ease-in-out infinite;animation-delay:var(--d,0ms)}
+@keyframes skInflate{
+  0%{transform:scaleY(0);opacity:1}
+  65%{transform:scaleY(1);opacity:1}
+  85%{transform:scaleY(1);opacity:0}
+  100%{transform:scaleY(0);opacity:0}
+}
+.sk-card{pointer-events:none}
+.sk-card:hover{border-color:var(--edge);box-shadow:none}
+
+/* Medidas de los bloques */
+.sk-title{height:36px;width:min(320px,70%);background:var(--line)}
+.sk-input{height:46px;border:2px solid var(--edge);background:var(--panel)}
+.sk-btn{height:44px;width:110px}
+.sk-sku{height:22px;width:55%}
+.sk-desc{height:18px;width:90%}
+.sk-desc.s{width:60%}
+.sk-chip{display:inline-block;height:22px;width:64px}
+.sk-chip.w{width:110px}
+.sk-mini{display:inline-block;height:18px;width:62px}
+.sk-line{height:16px;width:100%}
+.sk-line.s{width:40%}
+.sk-big{height:40px;width:70%}
+.sk-lcd{width:120px;height:80px}
+.sk-role{height:18px;width:60%;margin:0 auto}
+.sk-n{height:32px;width:70%}
+.sk-l{height:16px;width:60%}
+.sk-tagb{height:22px;width:44px}
+.sk-h2{height:22px;width:180px}
+.sk-v{height:34px;margin:4px 3px}
+
+/* Sobre fondos oscuros */
+.plate .sk-b,.sec-h .sk-b{background:rgba(255,255,255,.1)}
+.lcd .sk-b{background:rgba(255,255,255,.08)}
+
+/* Error con reintentar */
+.sk-err p{margin:0 0 14px}
+
+@media (max-width:640px){
+  .sk .cards .sk-card:nth-child(n+5){display:none}
+  .sk .filters .sk-btn{display:none}
+}
+@media (prefers-reduced-motion:reduce){.sk-lvl{display:none}}

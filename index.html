@@ -14,9 +14,9 @@
   <link rel="stylesheet" href="css/styles.css">
 
   <!-- Librerías externas ligeras (evitan inflar tu código) -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -34,7 +34,11 @@
   </header>
 
   <main class="wrap" id="app">
-    <div class="empty">Cargando catálogo desde la base de datos...</div>
+    <div class="sk-status" role="status">
+      <span class="sk-tag">HMI</span>
+      <span class="sk-status-txt">Cargando catálogo<span class="sk-dots">...</span></span>
+      <div class="sk-level"><div class="sk-level-fill"></div></div>
+    </div>
   </main>
 
   <div class="toast" id="toast" hidden role="status"></div>

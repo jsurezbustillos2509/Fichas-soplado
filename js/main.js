@@ -3,6 +3,14 @@ import { $ } from "./ui/bloques.js";
 import { renderCatalog } from "./ui/catalogo.js";
 import { renderFicha } from "./ui/ficha.js";
 import { closeOverlay } from "./ui/exportar.js";
+import { skeletonCatalog, skeletonFicha, errorBox } from "./ui/skeleton.js";
+
+// Espera mínima para que el esqueleto no parpadee cuando la carga es muy rápida
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+async function conMinimo(promesa, ms) {
+  const [res] = await Promise.all([promesa, esperar(ms)]);
+  return res;
+}
 
 let FICHAS = [];
 let currentId = null;
@@ -40,12 +48,15 @@ async function route() {
     return;
   }
 
-  $("#app").innerHTML = `<div class="empty">Cargando parámetros de ${f.maquina}...</div>`;
+  $("#app").innerHTML = skeletonFicha(f.maquina);
   try {
-    const hmiRow = await loadHmiRow(f.layout, f.id);
+    const hmiRow = await conMinimo(loadHmiRow(f.layout, f.id), 350);
+    if (currentId !== key) return; // el usuario ya navegó a otra pantalla
     renderFicha(f, hmiRow);
   } catch (err) {
-    $("#app").innerHTML = `<div class="empty">No se pudo cargar la hoja de la máquina ${f.maquina}. Verifica que esté publicada en la web.</div>`;
+    if (currentId !== key) return;
+    $("#app").innerHTML = errorBox(`No se pudo cargar la hoja de la máquina ${f.maquina}. Verifica que esté publicada en la web.`, "sk-retry");
+    $("#sk-retry").addEventListener("click", () => { currentId = null; route(); });
   }
 }
 
@@ -53,11 +64,13 @@ window.addEventListener("hashchange", route);
 
 // Arranque inicial (solo descarga RECETAS)
 async function init() {
+  $("#app").innerHTML = skeletonCatalog();
   try {
-    FICHAS = await loadRecetas();
+    FICHAS = await conMinimo(loadRecetas(), 600);
     route();
   } catch (err) {
-    $("#app").innerHTML = `<div class="empty">No se pudieron cargar las recetas desde Google Sheets. Verifica tu conexión o publicación CSV.</div>`;
+    $("#app").innerHTML = errorBox("No se pudieron cargar las recetas desde Google Sheets. Verifica tu conexión o publicación CSV.", "sk-retry");
+    $("#sk-retry").addEventListener("click", init);
   }
 }
 init();
