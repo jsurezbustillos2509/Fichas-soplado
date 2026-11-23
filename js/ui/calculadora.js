@@ -14,44 +14,46 @@ function flash(...els) {
 
 export function renderOperador(f) {
   const s = stats(f);
-  const tieneEnvBolsa = f.envasesPorBolsa > 0;
-  const bolsasHoraTxt = tieneEnvBolsa ? n1(s.bolsasHora) : (f.bolsas ? num(f.bolsas) : "—");
-  const bolsasSub = tieneEnvBolsa
+  const tieneEnvBolsa = f.envasesPorBolsa !== null && f.envasesPorBolsa > 0;
+  const bolsasHoraTxt = tieneEnvBolsa && s.bolsasHora !== null
+    ? n1(s.bolsasHora)
+    : (f.bolsas !== null && f.bolsas > 0 ? num(f.bolsas) : "Por registrar");
+  const bolsasSub = tieneEnvBolsa && s.teorico !== null
     ? `${s.teorico} env/h ÷ ${f.envasesPorBolsa} env/bolsa`
-    : (f.bolsasPeriodo ? esc(f.bolsasPeriodo) : "falta anotar envases_por_bolsa");
+    : (f.bolsasPeriodo ? esc(f.bolsasPeriodo) : "pendiente de registro");
 
   return `
     ${secH("OPERACIÓN", "Estándar operativo del puesto", "Meta y ritmo de producción")}
     <div class="stats" style="border:2px solid var(--edge)">
       <div class="stat">
-        <span class="n${s.porCiclo ? "" : " zero"}">${s.porCiclo}</span>
+        <span class="n${s.porCiclo !== null ? "" : " pend-stat"}">${s.porCiclo !== null ? s.porCiclo : "Por registrar"}</span>
         <span class="l">Envases por ciclo</span>
-        <span class="h">${s.porCiclo ? `${f.moldes} moldes × ${f.cavidades} cav.` : "falta anotar moldes y cav."}</span>
+        <span class="h">${s.porCiclo !== null ? `${f.moldes} moldes × ${f.cavidades} cav.` : "pendiente moldes/cav."}</span>
       </div>
       <div class="stat">
-        <span class="n">${s.ciclosHora}</span>
+        <span class="n${s.ciclosHora !== null ? "" : " pend-stat"}">${s.ciclosHora !== null ? s.ciclosHora : "Por registrar"}</span>
         <span class="l">Ciclos por hora</span>
-        <span class="h">3600 s ÷ ${num(f.ciclo)} s</span>
+        <span class="h">${f.ciclo !== null ? `3600 s ÷ ${num(f.ciclo)} s` : "pendiente ciclo"}</span>
       </div>
       <div class="stat">
-        <span class="n${s.teorico ? "" : " zero"}">${s.teorico}</span>
+        <span class="n${s.teorico !== null ? "" : " pend-stat"}">${s.teorico !== null ? s.teorico : "Por registrar"}</span>
         <span class="l">Envases/h teórico</span>
         <span class="h">sin paros ni rechazos</span>
       </div>
       <div class="stat">
-        <span class="n${tieneEnvBolsa ? "" : " zero"}">${tieneEnvBolsa ? num(f.envasesPorBolsa) : "—"}</span>
+        <span class="n${tieneEnvBolsa ? "" : " pend-stat"}">${tieneEnvBolsa ? num(f.envasesPorBolsa) : "Por registrar"}</span>
         <span class="l">Envases por bolsa</span>
         <span class="h">empaque estándar</span>
       </div>
       <div class="stat">
-        <span class="n${bolsasHoraTxt === "—" ? " zero" : ""}">${bolsasHoraTxt}</span>
+        <span class="n${bolsasHoraTxt === "Por registrar" ? " pend-stat" : ""}">${bolsasHoraTxt}</span>
         <span class="l">${tieneEnvBolsa ? "Bolsas por hora" : "Bolsas estándar"}</span>
         <span class="h">${bolsasSub}</span>
       </div>
       <div class="stat">
-        <span class="n${f.pesoG ? "" : " zero"}">${num(f.pesoG)} g</span>
+        <span class="n${f.pesoG !== null && f.pesoG > 0 ? "" : " pend-stat"}">${f.pesoG !== null && f.pesoG > 0 ? num(f.pesoG) + " g" : "Por registrar"}</span>
         <span class="l">Peso del envase</span>
-        <span class="h">${f.pesoG && s.porCiclo ? `${num(f.pesoG * s.porCiclo)} g por ciclo` : "falta anotar el peso"}</span>
+        <span class="h">${f.pesoG !== null && s.porCiclo !== null ? `${num(f.pesoG * s.porCiclo)} g por ciclo` : "pendiente peso"}</span>
       </div>
     </div>
 
@@ -100,19 +102,19 @@ export function bindOperador(f) {
 
   const update = (hrs, animar = true) => {
     const h = Math.max(0, Number(hrs) || 0);
-    const totalEnv = Math.round(s.teorico * h);
-    const totalBolsas = f.envasesPorBolsa > 0 ? totalEnv / f.envasesPorBolsa : 0;
-    const totalKg = f.pesoG > 0 ? (totalEnv * f.pesoG) / 1000 : 0;
+    const totalEnv = s.teorico !== null ? Math.round(s.teorico * h) : 0;
+    const totalBolsas = f.envasesPorBolsa !== null && f.envasesPorBolsa > 0 ? totalEnv / f.envasesPorBolsa : 0;
+    const totalKg = f.pesoG !== null && f.pesoG > 0 ? (totalEnv * f.pesoG) / 1000 : 0;
 
-    elBolsas.innerHTML = f.envasesPorBolsa > 0
+    elBolsas.innerHTML = f.envasesPorBolsa !== null && f.envasesPorBolsa > 0 && s.teorico !== null
       ? `${Math.floor(totalBolsas).toLocaleString("es-ES")} <small>bolsas</small>`
-      : `<small>falta env/bolsa</small>`;
-    elEnv.innerHTML = s.teorico > 0
+      : `<small>Por registrar</small>`;
+    elEnv.innerHTML = s.teorico !== null && s.teorico > 0
       ? `${totalEnv.toLocaleString("es-ES")} <small>env.</small>`
-      : `<small>por anotar</small>`;
-    elKg.innerHTML = f.pesoG > 0 && s.teorico > 0
+      : `<small>Por registrar</small>`;
+    elKg.innerHTML = f.pesoG !== null && f.pesoG > 0 && s.teorico !== null && s.teorico > 0
       ? `${n1(totalKg)} <small>kg</small>`
-      : `<small>por anotar</small>`;
+      : `<small>Por registrar</small>`;
 
     btns.forEach((b) => b.classList.toggle("active", Math.abs(Number(b.dataset.hrs) - h) < 0.01));
     if (animar) flash(elBolsas, elEnv, elKg);
@@ -130,14 +132,15 @@ export function bindOperador(f) {
 
 export function renderMolinero(f) {
   const p = f.preparada;
-  const baseKg = p?.mp1?.kg || 0;
+  const baseKg = p?.mp1?.kg;
 
-  if (!baseKg) {
+  if (baseKg === null || baseKg === undefined || baseKg <= 0) {
     return `
-      ${secH("PREPARADA / MOLINO", "Fórmula de materia prima", "Pendiente de carga")}
+      ${secH("PREPARADA / MOLINO", "Fórmula de materia prima", "Por registrar")}
       <div class="empty">
+        <span class="flag">POR REGISTRAR</span><br><br>
         Esta ficha aún no tiene cargada su fórmula de preparada.<br>
-        Completa las columnas <b>mp1_nombre, mp1_codigo, mp1_kg, master_nombre, master_codigo, master_gr, molido_min_kg, molido_max_kg</b> en tu hoja RECETAS.
+        Completa los datos de materia prima y masterbatch para habilitar la calculadora del molinero.
       </div>`;
   }
 

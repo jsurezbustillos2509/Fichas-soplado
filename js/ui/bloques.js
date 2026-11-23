@@ -6,23 +6,27 @@ export const esc = (s) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
   );
 
-export const num = (v) => String(v).replace(".", ",");
-export const n1 = (v) => Number(v).toFixed(1).replace(".", ",");
-export const secs = (v, f) => (v * f.unidad.factor).toFixed(1).replace(".", ",");
+export const num = (v) => (v === null || v === undefined ? "Por registrar" : String(v).replace(".", ","));
+export const n1 = (v) => (v === null || v === undefined ? "Por registrar" : Number(v).toFixed(1).replace(".", ","));
+export const secs = (v, f) => (v === null || v === undefined ? "Por registrar" : (v * f.unidad.factor).toFixed(1).replace(".", ","));
 export const dateEs = (d) => (d ? d.split("-").reverse().join("/") : "");
 
 export function stats(f) {
-  const porCiclo = f.moldes * f.cavidades;
-  const ciclosHora = Math.round(3600 / f.ciclo);
-  const teorico = Math.round((3600 / f.ciclo) * porCiclo);
-  const bolsasHora = f.envasesPorBolsa > 0 ? teorico / f.envasesPorBolsa : 0;
+  const hasMolde = f.moldes !== null && f.cavidades !== null && f.moldes > 0 && f.cavidades > 0;
+  const hasCiclo = f.ciclo !== null && f.ciclo > 0;
+  const porCiclo = hasMolde ? f.moldes * f.cavidades : null;
+  const ciclosHora = hasCiclo ? Math.round(3600 / f.ciclo) : null;
+  const teorico = hasCiclo && porCiclo !== null ? Math.round((3600 / f.ciclo) * porCiclo) : null;
+  const bolsasHora = teorico !== null && f.envasesPorBolsa !== null && f.envasesPorBolsa > 0
+    ? teorico / f.envasesPorBolsa
+    : null;
   return { porCiclo, ciclosHora, teorico, bolsasHora };
 }
 
 export const moldesTxt = (f) =>
-  f.moldes && f.cavidades
+  f.moldes !== null && f.cavidades !== null && f.moldes > 0 && f.cavidades > 0
     ? `${f.moldes} MOLDES × ${f.cavidades} ${f.cavidades === 1 ? "CAVIDAD" : "CAVIDADES"}`
-    : "MOLDES × CAVIDADES: POR ANOTAR";
+    : "MOLDES × CAVIDADES: POR REGISTRAR";
 
 let toastT;
 export function toast(msg) {
@@ -54,8 +58,15 @@ const gridLines = (max) =>
 
 // 1) Barras simples (ej. TIME 1 en QCM / QCM-75)
 export function bloqueBarrasSimples(f, items, nota = "") {
-  const max = f.ciclo;
+  const max = f.ciclo && f.ciclo > 0 ? f.ciclo : 30;
   const bars = items.map(([n, v]) => {
+    if (v === null || v === undefined) {
+      return `<div class="brow pend">
+        <div class="lb">${esc(n)}</div>
+        <div class="track pend-track"><span>Por registrar</span></div>
+        <div class="vl pend-txt">Por reg.</div>
+      </div>`;
+    }
     const w = Math.min(100, ((v * f.unidad.factor) / max) * 100);
     return `<div class="brow${v === 0 ? " zero" : ""}">
       <div class="lb">${esc(n)}</div>
@@ -70,19 +81,28 @@ export function bloqueBarrasSimples(f, items, nota = "") {
 
 // 2) Barras dobles IZQ/DER (ej. BEKUM)
 export function bloqueBarrasDobles(f, items, notas = []) {
-  const max = f.ciclo;
+  const max = f.ciclo && f.ciclo > 0 ? f.ciclo : 30;
   const bars = items.map(([n, l, r]) => {
-    const wl = Math.min(100, ((l * f.unidad.factor) / max) * 100);
-    const wr = Math.min(100, ((r * f.unidad.factor) / max) * 100);
-    const df = l !== r;
-    return `<div class="brow${l === 0 && r === 0 ? " zero" : ""}">
+    if ((l === null || l === undefined) && (r === null || r === undefined)) {
+      return `<div class="brow pend">
+        <div class="lb">${esc(n)}</div>
+        <div class="track two pend-track"><span>Por registrar</span></div>
+        <div class="vl2 pend-txt"><span>Por reg.</span></div>
+      </div>`;
+    }
+    const lv = l ?? 0;
+    const rv = r ?? 0;
+    const wl = Math.min(100, ((lv * f.unidad.factor) / max) * 100);
+    const wr = Math.min(100, ((rv * f.unidad.factor) / max) * 100);
+    const df = lv !== rv;
+    return `<div class="brow${lv === 0 && rv === 0 ? " zero" : ""}">
       <div class="lb">${esc(n)}</div>
-      <div class="track two" role="img" aria-label="${esc(n)}: izq ${secs(l, f)} s, der ${secs(r, f)} s">
+      <div class="track two" role="img" aria-label="${esc(n)}: izq ${secs(lv, f)} s, der ${secs(rv, f)} s">
         ${gridLines(max)}
-        ${l > 0 ? `<div class="fill l" style="width:max(4px,${wl.toFixed(2)}%)"></div>` : ""}
-        ${r > 0 ? `<div class="fill d" style="width:max(4px,${wr.toFixed(2)}%)"></div>` : ""}
+        ${lv > 0 ? `<div class="fill l" style="width:max(4px,${wl.toFixed(2)}%)"></div>` : ""}
+        ${rv > 0 ? `<div class="fill d" style="width:max(4px,${wr.toFixed(2)}%)"></div>` : ""}
       </div>
-      <div class="vl2"><span${df ? ' class="df"' : ""}><i>I</i>${n1(l)}</span><span${df ? ' class="df"' : ""}><i>D</i>${n1(r)}</span></div>
+      <div class="vl2"><span${df ? ' class="df"' : ""}><i>I</i>${l === null ? "—" : n1(l)}</span><span${df ? ' class="df"' : ""}><i>D</i>${r === null ? "—" : n1(r)}</span></div>
     </div>`;
   }).join("");
   const leyenda = `<div class="key"><span><b style="background:var(--yellow)"></b>IZQ (I)</span><span><b style="background:var(--steel)"></b>DER (D)</span><span><b style="background:var(--hi)"></b>valor distinto entre lados</span></div>`;
@@ -91,21 +111,28 @@ export function bloqueBarrasDobles(f, items, notas = []) {
 
 // 3) Tablas L/R a dos columnas (ej. TIME 2 y PQ1)
 const ptab = (rows) => `<div class="ptab"><div class="phead"><span></span><span>L</span><span>R</span></div>${rows.map(([n, l, r]) => {
-  const cls = (v) => "v" + (v === 0 ? " zero" : "");
-  return `<div class="prow"><div class="nm">${esc(n)}</div>${r === undefined || r === null
-    ? `<div class="${cls(l)} one">${num(l)}</div>`
-    : `<div class="${cls(l)}">${num(l)}</div><div class="${cls(r)}">${num(r)}</div>`}</div>`;
+  const cell = (v, extra = "") => (v === null || v === undefined
+    ? `<div class="v pend ${extra}">Por reg.</div>`
+    : `<div class="v${v === 0 ? " zero" : ""} ${extra}">${num(v)}</div>`);
+  return `<div class="prow"><div class="nm">${esc(n)}</div>${r === undefined
+    ? cell(l, "one")
+    : `${cell(l)}${cell(r)}`}</div>`;
 }).join("")}</div>`;
 
 export const bloqueTablasLR = (izq, der) => `<div class="cols">${ptab(izq)}${ptab(der)}</div>`;
 
 // 4) Cuadrícula PQ2 (P y Q por pasos 1-2-3)
-export const bloquePQ2 = (bloques) => `<div class="pq2">${bloques.map((b) => `
+export const bloquePQ2 = (bloques) => `<div class="pq2">${bloques.map((b) => {
+  const pqCell = (v) => (v === null || v === undefined
+    ? `<span class="v pend">—</span>`
+    : `<span class="v${v === 0 ? " zero" : ""}">${num(v)}</span>`);
+  return `
   <div class="pqb"><h3>${esc(b.t)}</h3><div class="pqg">
     <span></span><span class="h">1</span><span class="h">2</span><span class="h">3</span>
-    <span class="r">P</span>${b.P.map((v) => `<span class="v${v === 0 ? " zero" : ""}">${num(v)}</span>`).join("")}
-    <span class="r">Q</span>${b.Q.map((v) => `<span class="v${v === 0 ? " zero" : ""}">${num(v)}</span>`).join("")}
-  </div></div>`).join("")}</div>`;
+    <span class="r">P</span>${b.P.map(pqCell).join("")}
+    <span class="r">Q</span>${b.Q.map(pqCell).join("")}
+  </div></div>`;
+}).join("")}</div>`;
 
 // 5) Zonas de temperatura + interruptores opcionales
 export function bloqueZonasTemp(zonas, { clase = "", decimales = false, switches = [], extras = [] } = {}) {
@@ -125,16 +152,16 @@ export function bloqueZonasTemp(zonas, { clase = "", decimales = false, switches
     : "";
 
   const exHtml = extras.length
-    ? `<div class="vfd" style="margin-top:12px">${extras.map((e) => e.c !== undefined
-        ? `<div class="vf"><div class="l">${esc(e.n)}</div><div class="n">${n1(e.c)}<small> ${e.u} consigna</small></div><div class="za2">actual ${n1(e.a)} ${e.u}</div></div>`
-        : tileHtml(e.n, e.v, e.u, e.pend)).join("")}</div>`
+    ? `<div class="vfd" style="margin-top:12px">${extras.map((e) => e.c !== undefined && e.c !== null
+        ? `<div class="vf"><div class="l">${esc(e.n)}</div><div class="n">${n1(e.c)}<small> ${e.u} consigna</small></div><div class="za2">actual ${e.a !== null && e.a !== undefined ? n1(e.a) : "—"} ${e.u}</div></div>`
+        : tileHtml(e.n, e.c !== undefined ? e.c : e.v, e.u, e.pend || "Por registrar")).join("")}</div>`
     : "";
 
   return zHtml + swHtml + exHtml;
 }
 
 // 6) Tarjetas numéricas (Variadores, Manga, Herramientas simples)
-const tileHtml = (l, v, u = "", pend = "por anotar") =>
+const tileHtml = (l, v, u = "", pend = "Por registrar") =>
   v === null || v === undefined
     ? `<div class="vf pend"><div class="l">${esc(l)}</div><div class="n">${esc(pend)}</div></div>`
     : `<div class="vf"><div class="l">${esc(l)}</div><div class="n${v === 0 ? " zero" : ""}">${num(v)}<small> ${esc(u)}</small></div></div>`;

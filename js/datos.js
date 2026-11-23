@@ -36,6 +36,84 @@ function fetchCsv(url) {
 // Caché en memoria (evita descargar dos veces la misma hoja)
 let recetasCache = null;
 const hmiCache = new Map();
+const localHmiRows = new Map();
+
+function mapRecetaRow(r) {
+  return {
+    id: String(r.id || "").trim(),
+    layout: String(r.layout || "").trim().toLowerCase(),
+    sku: String(r.sku || "").trim(),
+    desc: String(r.desc || "").trim(),
+    maquina: String(r.maquina || "").trim(),
+    hmi: String(r.hmi || "").trim(),
+    ciclo: numOrNull(r.ciclo),
+    cicloTipo: String(r.cicloTipo || "Ciclo real").trim(),
+    moldes: numOrNull(r.moldes),
+    cavidades: numOrNull(r.cavidades),
+    pesoG: numOrNull(r.pesoG),
+    bolsas: numOrNull(r.bolsas),
+    bolsasPeriodo: strOrNull(r.bolsasPeriodo),
+    envasesPorBolsa: numOrNull(r.envases_por_bolsa),
+    foto: String(r.foto || "").trim(),
+    fecha: String(r.fecha || "").trim(),
+    version: String(r.version || "1.0").trim(),
+    unidad: {
+      factor: toNum(r.unidad_factor, 0.1),
+      confirmada: toBool(r.unidad_confirmada)
+    },
+    leyenda: r.leyenda
+      ? String(r.leyenda).split("|").map((t) => t.trim()).filter(Boolean)
+      : [],
+    // Datos del Molinero (Preparada)
+    preparada: {
+      mp1: {
+        nombre: strOrNull(r.mp1_nombre),
+        codigo: strOrNull(r.mp1_codigo),
+        kg: numOrNull(r.mp1_kg)
+      },
+      mp2: {
+        nombre: strOrNull(r.mp2_nombre),
+        codigo: strOrNull(r.mp2_codigo),
+        kg: numOrNull(r.mp2_kg)
+      },
+      master: {
+        nombre: strOrNull(r.master_nombre),
+        codigo: strOrNull(r.master_codigo),
+        gr: numOrNull(r.master_gr)
+      },
+      molido: {
+        minKg: numOrNull(r.molido_min_kg),
+        maxKg: numOrNull(r.molido_max_kg)
+      }
+    }
+  };
+}
+
+// Detecta si a una ficha le faltan datos estándar en RECETAS
+export function isFichaIncompleta(f) {
+  return (
+    !f.desc ||
+    f.ciclo === null ||
+    f.moldes === null ||
+    f.cavidades === null ||
+    f.pesoG === null ||
+    f.envasesPorBolsa === null ||
+    !f.foto ||
+    f.preparada?.mp1?.kg === null
+  );
+}
+
+// Inserta al instante una ficha recién guardada en memoria (sin esperar el caché CSV de Google)
+export function addRecetaLocal(rawReceta, rawHmi) {
+  const mapped = mapRecetaRow(rawReceta);
+  if (recetasCache) {
+    recetasCache.push(mapped);
+  }
+  if (rawHmi && mapped.id) {
+    localHmiRows.set(mapped.id, rawHmi);
+  }
+  return mapped;
+}
 
 // 1) Carga únicamente la hoja RECETAS para mostrar el catálogo al instante
 export async function loadRecetas() {
@@ -44,60 +122,15 @@ export async function loadRecetas() {
 
   recetasCache = rows
     .filter((r) => r.id && String(r.id).trim() !== "")
-    .map((r) => ({
-      id: String(r.id || "").trim(),
-      layout: String(r.layout || "").trim().toLowerCase(),
-      sku: String(r.sku || "").trim(),
-      desc: String(r.desc || "").trim(),
-      maquina: String(r.maquina || "").trim(),
-      hmi: String(r.hmi || "").trim(),
-      ciclo: toNum(r.ciclo, 1),
-      cicloTipo: String(r.cicloTipo || "Ciclo real").trim(),
-      moldes: toNum(r.moldes, 0),
-      cavidades: toNum(r.cavidades, 0),
-      pesoG: toNum(r.pesoG, 0),
-      bolsas: toNum(r.bolsas, 0),
-      bolsasPeriodo: strOrNull(r.bolsasPeriodo),
-      envasesPorBolsa: toNum(r.envases_por_bolsa, 0),
-      foto: String(r.foto || "").trim(),
-      fecha: String(r.fecha || "").trim(),
-      version: String(r.version || "1.0").trim(),
-      unidad: {
-        factor: toNum(r.unidad_factor, 0.1),
-        confirmada: toBool(r.unidad_confirmada)
-      },
-      leyenda: r.leyenda
-        ? String(r.leyenda).split("|").map((t) => t.trim()).filter(Boolean)
-        : [],
-      // Datos del Molinero (Preparada)
-      preparada: {
-        mp1: {
-          nombre: strOrNull(r.mp1_nombre),
-          codigo: strOrNull(r.mp1_codigo),
-          kg: toNum(r.mp1_kg, 0)
-        },
-        mp2: {
-          nombre: strOrNull(r.mp2_nombre),
-          codigo: strOrNull(r.mp2_codigo),
-          kg: toNum(r.mp2_kg, 0)
-        },
-        master: {
-          nombre: strOrNull(r.master_nombre),
-          codigo: strOrNull(r.master_codigo),
-          gr: toNum(r.master_gr, 0)
-        },
-        molido: {
-          minKg: numOrNull(r.molido_min_kg),
-          maxKg: numOrNull(r.molido_max_kg)
-        }
-      }
-    }));
+    .map(mapRecetaRow);
 
   return recetasCache;
 }
 
 // 2) Carga bajo demanda la hoja específica de una HMI y devuelve la fila de ese ID
 export async function loadHmiRow(layout, id) {
+  if (localHmiRows.has(id)) return localHmiRows.get(id);
+
   const key = String(layout || "").trim().toLowerCase();
   const url = HMI_URLS[key];
   if (!url) return null;

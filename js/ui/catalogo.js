@@ -1,11 +1,19 @@
+import { isFichaIncompleta } from "../datos.js";
 import { $, esc, num, stats } from "./bloques.js";
+import { openNewSkuFlow } from "./nuevo-sku.js";
 
 const filt = { maq: "", q: "" };
 
 export function renderCatalog(fichas) {
   const maqs = [...new Set(fichas.map((f) => f.maquina).filter(Boolean))].sort();
   $("#app").innerHTML = `
-    <div class="page-h"><h1>Catálogo de recetas</h1><span class="count" id="count"></span></div>
+    <div class="page-h">
+      <div>
+        <h1>Catálogo de recetas</h1>
+        <span class="count" id="count"></span>
+      </div>
+      <button class="btn solid" id="btn-new-sku" type="button">+ Agregar SKU</button>
+    </div>
     <p class="lead">Elige una máquina o busca por SKU o descripción. También puedes escanear el QR pegado en la máquina para abrir directo su ficha.</p>
     <div class="filters">
       <div class="field"><label for="f-maq">Máquina</label>
@@ -27,6 +35,7 @@ export function renderCatalog(fichas) {
     $("#cards").innerHTML = list.length
       ? list.map((f, idx) => {
           const s = stats(f);
+          const incompleta = isFichaIncompleta(f);
           const fotoHtml = f.foto
             ? `<div class="ph"><img src="${esc(f.foto)}" alt="Envase ${esc(f.desc)}" loading="${idx < 4 ? "eager" : "lazy"}"${idx < 2 ? ' fetchpriority="high"' : ""} decoding="async"></div>`
             : `<div class="ph ph-empty"><span>Sin foto</span></div>`;
@@ -34,15 +43,16 @@ export function renderCatalog(fichas) {
             ${fotoHtml}
             <div class="body">
               <div class="sku">${esc(f.sku)}</div>
-              <div class="desc">${esc(f.desc)}</div>
+              <div class="desc">${f.desc ? esc(f.desc) : '<span class="pend-inline">Por registrar</span>'}</div>
               <div class="chips">
                 <span class="chip">${esc(f.maquina)}</span>
-                <span class="chip out">${f.moldes && f.cavidades ? `${f.moldes} moldes × ${f.cavidades} cav.` : "moldes y cav. por anotar"}</span>
+                ${incompleta ? `<span class="chip warn">Incompleta</span>` : ""}
+                <span class="chip out">${f.moldes && f.cavidades ? `${f.moldes} moldes × ${f.cavidades} cav.` : "Por registrar"}</span>
               </div>
               <div class="mini">
-                <span><b>${num(f.ciclo)}</b> s ciclo</span>
-                <span><b>${s.porCiclo || "—"}</b> env/ciclo</span>
-                <span><b>${f.pesoG ? num(f.pesoG) : "—"}</b> g</span>
+                <span><b>${f.ciclo !== null ? num(f.ciclo) + " s" : "Por reg."}</b> ciclo</span>
+                <span><b>${s.porCiclo !== null ? s.porCiclo : "Por reg."}</b> env/ciclo</span>
+                <span><b>${f.pesoG !== null ? num(f.pesoG) + " g" : "Por reg."}</b></span>
               </div>
             </div>
           </a>`;
@@ -60,6 +70,10 @@ export function renderCatalog(fichas) {
       ph.innerHTML = "<span>Sin foto</span>";
     }
   }, true);
+
+  $("#btn-new-sku").addEventListener("click", () => {
+    openNewSkuFlow(fichas, () => renderCatalog(fichas));
+  });
 
   $("#f-maq").addEventListener("change", (e) => { filt.maq = e.target.value; draw(); });
   $("#f-q").addEventListener("input", (e) => { filt.q = e.target.value; draw(); });

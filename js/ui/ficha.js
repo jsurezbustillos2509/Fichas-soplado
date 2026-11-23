@@ -48,7 +48,7 @@ export function renderFicha(f, hmiRow) {
         <div class="info">
           <div class="kicker">Ficha de proceso · Soplado PEAD · <span class="role-badge" id="role-badge"></span></div>
           <div class="sku-big">${esc(f.sku)}</div>
-          <div class="desc-big">${esc(f.desc)}</div>
+          <div class="desc-big">${f.desc ? esc(f.desc) : '<span class="pend-inline">Descripción por registrar</span>'}</div>
           <div class="chips">
             <span class="chip">MÁQUINA ${esc(f.maquina)}</span>
             <span class="chip out" style="color:var(--plate-fg);border-color:var(--plate-mute)">${moldesTxt(f)}</span>
@@ -57,13 +57,13 @@ export function renderFicha(f, hmiRow) {
         <div class="lcds">
           <div class="lcd" id="lcd-meta">
             <small>Meta</small>
-            <span class="dig">${f.bolsas > 0 ? Math.floor(f.bolsas) : "—"}</span>
+            <span class="dig${f.bolsas !== null && f.bolsas > 0 ? "" : " dig-pend"}">${f.bolsas !== null && f.bolsas > 0 ? Math.floor(f.bolsas) : "Por reg."}</span>
             <span class="u">bolsas</span>
           </div>
           <div class="lcd">
             <small>${esc(f.cicloTipo || "Ciclo real")}</small>
-            <span class="dig">${num(f.ciclo)}</span>
-            <span class="u">segundos</span>
+            <span class="dig${f.ciclo !== null && f.ciclo > 0 ? "" : " dig-pend"}">${f.ciclo !== null && f.ciclo > 0 ? num(f.ciclo) : "Por reg."}</span>
+            <span class="u">${f.ciclo !== null && f.ciclo > 0 ? "segundos" : "sin ciclo"}</span>
           </div>
         </div>
       </div>
