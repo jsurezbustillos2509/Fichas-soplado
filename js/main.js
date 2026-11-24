@@ -4,6 +4,7 @@ import { renderCatalog } from "./ui/catalogo.js";
 import { renderFicha } from "./ui/ficha.js";
 import { closeOverlay } from "./ui/exportar.js";
 import { skeletonCatalog, skeletonFicha, errorBox } from "./ui/skeleton.js";
+import { syncNavidadTheme } from "./ui/navidad.js";
 
 // Espera mínima para que el esqueleto no parpadee cuando la carga es muy rápida
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -15,18 +16,20 @@ async function conMinimo(promesa, ms) {
 let FICHAS = [];
 let currentId = null;
 
-// Manejo del tema Claro / Oscuro / Auto
-const THEMES = ["auto", "light", "dark"];
-const THEME_LABEL = { auto: "Auto", light: "Claro", dark: "Oscuro" };
-let theme = localStorage.getItem("fp-theme") || "auto";
+// Manejo del tema Navidad / Claro / Oscuro / Auto
+const THEMES = ["navidad", "auto", "light", "dark"];
+const THEME_LABEL = { navidad: "🎄 Navidad", auto: "Auto", light: "Claro", dark: "Oscuro" };
+let theme = localStorage.getItem("fp-theme") || "navidad";
+if (!THEMES.includes(theme)) theme = "navidad";
 
 function applyTheme() {
   if (theme === "auto") document.documentElement.removeAttribute("data-theme");
   else document.documentElement.setAttribute("data-theme", theme);
   $("#theme").textContent = "Tema: " + THEME_LABEL[theme];
+  syncNavidadTheme(theme === "navidad");
 }
 $("#theme").addEventListener("click", () => {
-  theme = THEMES[(THEMES.indexOf(theme) + 1) % 3];
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
   try { localStorage.setItem("fp-theme", theme); } catch (e) {}
   applyTheme();
 });
