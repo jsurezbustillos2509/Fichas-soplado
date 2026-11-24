@@ -1,5 +1,5 @@
 import { numOrNull, strOrNull } from "../datos.js";
-import { secH, num, bloqueBarrasSimples, bloqueTablasLR, bloquePQ2, bloqueTarjetas, bloqueAgujasLR } from "../ui/bloques.js";
+import { secH, num, bloqueBarrasSimples, bloqueTablasLR, bloquePQ2, bloqueTarjetas, bloqueHerramientas } from "../ui/bloques.js";
 
 export function renderQCM75_1(f, q = {}) {
   const time1 = [
@@ -44,6 +44,10 @@ export function renderQCM75_1(f, q = {}) {
     { t: "L · Station down", P: [numOrNull(q.pq2_L_Station_down_P1), numOrNull(q.pq2_L_Station_down_P2), numOrNull(q.pq2_L_Station_down_P3)], Q: [numOrNull(q.pq2_L_Station_down_Q1), numOrNull(q.pq2_L_Station_down_Q2), numOrNull(q.pq2_L_Station_down_Q3)] },
     { t: "R · Station down", P: [numOrNull(q.pq2_R_Station_down_P1), numOrNull(q.pq2_R_Station_down_P2), numOrNull(q.pq2_R_Station_down_P3)], Q: [numOrNull(q.pq2_R_Station_down_Q1), numOrNull(q.pq2_R_Station_down_Q2), numOrNull(q.pq2_R_Station_down_Q3)] }
   ];
+  const cabezal = {
+    cono: numOrNull(q.herramientas_cono),
+    funda: numOrNull(q.herramientas_funda)
+  };
   const agujas = {
     L: { casquillo: strOrNull(q.agujas_L_casquillo), cuchilla: strOrNull(q.agujas_L_cuchilla), cuello: strOrNull(q.agujas_L_cuello) },
     R: { casquillo: strOrNull(q.agujas_R_casquillo), cuchilla: strOrNull(q.agujas_R_cuchilla), cuello: strOrNull(q.agujas_R_cuello) }
@@ -59,6 +63,6 @@ export function renderQCM75_1(f, q = {}) {
     ${bloquePQ2(pq2)}
     ${secH("VARIADOR", "Lectura del variador")}
     ${bloqueTarjetas([{ l: "Frecuencia", v: numOrNull(q.variador_hz), u: "Hz" }, { l: "Corriente", v: numOrNull(q.variador_a), u: "A" }, { l: "Voltaje mostrado", v: numOrNull(q.variador_v), u: "V" }])}
-    ${secH("AGUJAS", "Herramientas: casquillo, cuchilla y cuello", "Para el cambio de formato")}
-    ${bloqueAgujasLR(agujas, "Por registrar")}`;
+    ${secH("HERRAMIENTAS", "Cabezal y herramientas de aguja", "Cambio de formato (mm)")}
+    ${bloqueHerramientas({ cabezal, agujas, pend: "Por registrar" })}`;
 }

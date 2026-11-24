@@ -169,13 +169,80 @@ const tileHtml = (l, v, u = "", pend = "Por registrar") =>
 export const bloqueTarjetas = (items) =>
   `<div class="vfd">${items.map((t) => tileHtml(t.l, t.v, t.u, t.pend)).join("")}</div>`;
 
-// 7) Herramientas / Agujas Molde L y Molde R
-const toolBox = (v, pend) =>
-  v === null || v === undefined ? `<div class="blank">${esc(pend)}</div>` : `<div class="blank filled">${num(v)}</div>`;
+// 7) Herramientas de Cabezal (Cono / Funda) y Agujas (Casquillo / Cuchilla / Cuello) en mm
+const fmtMm = (v) => {
+  if (v === null || v === undefined || String(v).trim() === "") return null;
+  const clean = String(v).trim().replace(/\s*mm$/i, "");
+  const parsed = Number(clean.replace(",", "."));
+  return Number.isFinite(parsed) ? num(parsed) : esc(clean);
+};
 
-export const bloqueAgujasLR = (a, pend = "por anotar") => `
-  <div class="tools">
-    <span></span><span class="hh">Casquillo</span><span class="hh">Cuchilla</span><span class="hh">Altura cuello</span>
-    <span class="mo">Molde L</span>${toolBox(a.L.casquillo, pend)}${toolBox(a.L.cuchilla, pend)}${toolBox(a.L.cuello, pend)}
-    <span class="mo">Molde R</span>${toolBox(a.R.casquillo, pend)}${toolBox(a.R.cuchilla, pend)}${toolBox(a.R.cuello, pend)}
-  </div>`;
+const specCardMm = (label, rawVal, pend = "Por registrar") => {
+  const val = fmtMm(rawVal);
+  const ok = val !== null;
+  return `
+    <div style="background:var(--panel);border:1px solid ${ok ? "var(--line)" : "dashed var(--line)"};border-left:3px solid ${ok ? "var(--yellow)" : "var(--steel)"};border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--steel)">${esc(label)}</span>
+      ${ok
+        ? `<div style="font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--ink);line-height:1.15">${val}<span style="font-size:12px;font-weight:500;color:var(--steel);margin-left:4px">mm</span></div>`
+        : `<div style="font-size:13px;font-weight:500;color:var(--steel);font-style:italic;line-height:1.4">${esc(pend)}</div>`}
+    </div>`;
+};
+
+const cellMm = (rawVal, pend = "Por registrar") => {
+  const val = fmtMm(rawVal);
+  return val !== null
+    ? `<div class="blank filled" style="font-family:var(--font-mono);font-weight:600">${val} <small style="font-weight:500;opacity:.75">mm</small></div>`
+    : `<div class="blank">${esc(pend)}</div>`;
+};
+
+export function bloqueHerramientas({ cabezal = {}, agujas = null, simple = null, pend = "Por registrar" } = {}) {
+  const cabezalHtml = `
+    <div style="padding:12px 14px;border-bottom:1px solid var(--line)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)">Herramientas del Cabezal</span>
+        <span style="font-size:10px;font-family:var(--font-mono);padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--steel)">EXTRUSIÓN · MM</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+        ${specCardMm("Cono", cabezal.cono, pend)}
+        ${specCardMm("Funda", cabezal.funda, pend)}
+      </div>
+    </div>`;
+
+  let agujaHtml = "";
+  if (simple) {
+    agujaHtml = `
+      <div style="padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)">Herramientas de la Aguja</span>
+          <span style="font-size:10px;font-family:var(--font-mono);padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--steel)">SOPLADO · MM</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          ${specCardMm("Casquillo", simple.casquillo, pend)}
+          ${specCardMm("Cuchilla", simple.cuchilla, pend)}
+          ${specCardMm("Altura cuello", simple.cuello, pend)}
+        </div>
+      </div>`;
+  } else if (agujas) {
+    agujaHtml = `
+      <div style="padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)">Herramientas de las Agujas</span>
+          <span style="font-size:10px;font-family:var(--font-mono);padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--steel)">MOLDES L / R · MM</span>
+        </div>
+        <div class="tools" style="margin:0">
+          <span></span><span class="hh">Casquillo</span><span class="hh">Cuchilla</span><span class="hh">Altura cuello</span>
+          <span class="mo">Molde L</span>${cellMm(agujas.L?.casquillo, pend)}${cellMm(agujas.L?.cuchilla, pend)}${cellMm(agujas.L?.cuello, pend)}
+          <span class="mo">Molde R</span>${cellMm(agujas.R?.casquillo, pend)}${cellMm(agujas.R?.cuchilla, pend)}${cellMm(agujas.R?.cuello, pend)}
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:rgba(127,138,148,.04);margin-top:6px">
+      ${cabezalHtml}
+      ${agujaHtml}
+    </div>`;
+}
+
+export const bloqueAgujasLR = (a, pend = "Por registrar") => bloqueHerramientas({ agujas: a, pend });

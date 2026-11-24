@@ -1,5 +1,5 @@
 import { numOrNull, toBool } from "../datos.js";
-import { secH, esc, num, n1, bloqueBarrasDobles, bloqueZonasTemp, bloqueTarjetas } from "../ui/bloques.js";
+import { secH, esc, num, n1, bloqueBarrasDobles, bloqueZonasTemp, bloqueTarjetas, bloqueHerramientas } from "../ui/bloques.js";
 
 export function renderBekum(f, b = {}) {
   const tiempos = [
@@ -50,10 +50,17 @@ export function renderBekum(f, b = {}) {
       { l: "Perilla (R10K)", v: perilla, u: "%" }
     ])}
     <p class="note">Estado del variador: ${esc(b.manga_estado || "Por registrar")}.${perilla !== null ? ` La perilla se lee a ojo (≈ ${perilla} %).` : ""} Anotado a mano: "${esc(b.manga_nota || "Por registrar")}".</p>
-    ${secH("AGUJAS", "Herramientas de aguja", "Para el cambio de formato (mm)")}
-    ${bloqueTarjetas([
-      { l: "Casquillo", v: numOrNull(b.herramientas_casquillo), u: "mm" },
-      { l: "Cuchilla", v: numOrNull(b.herramientas_cuchilla), u: "mm" },
-      { l: "Altura del cuello", v: numOrNull(b.herramientas_cuello), u: "mm" }
-    ])}`;
+    ${secH("HERRAMIENTAS", "Cabezal y herramientas de aguja", "Cambio de formato (mm)")}
+    ${bloqueHerramientas({
+      cabezal: {
+        cono: numOrNull(b.herramientas_cono),
+        funda: numOrNull(b.herramientas_funda)
+      },
+      simple: {
+        casquillo: numOrNull(b.herramientas_casquillo),
+        cuchilla: numOrNull(b.herramientas_cuchilla),
+        cuello: numOrNull(b.herramientas_cuello)
+      },
+      pend: "Por registrar"
+    })}`;
 }

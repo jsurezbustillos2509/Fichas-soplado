@@ -68,18 +68,20 @@ function getHmiSections(layout) {
         ].map(([k, l]) => ({ key: k, label: l, type: "num" }))
       },
       {
-        tag: "VARIADOR Y AGUJAS",
-        title: "Variador y herramientas L / R",
+        tag: "HERRAMIENTAS",
+        title: "Variador, cabezal y agujas (mm)",
         fields: [
           { key: "variador_hz", label: "Variador (Hz)", type: "num" },
           { key: "variador_a", label: "Variador (A)", type: "num" },
           { key: "variador_v", label: "Variador (V)", type: "num" },
-          { key: "agujas_L_casquillo", label: "Molde L · Casquillo", type: "text" },
-          { key: "agujas_L_cuchilla", label: "Molde L · Cuchilla", type: "text" },
-          { key: "agujas_L_cuello", label: "Molde L · Altura cuello", type: "text" },
-          { key: "agujas_R_casquillo", label: "Molde R · Casquillo", type: "text" },
-          { key: "agujas_R_cuchilla", label: "Molde R · Cuchilla", type: "text" },
-          { key: "agujas_R_cuello", label: "Molde R · Altura cuello", type: "text" }
+          { key: "herramientas_cono", label: "Cabezal · Cono (mm)", type: "num" },
+          { key: "herramientas_funda", label: "Cabezal · Funda (mm)", type: "num" },
+          { key: "agujas_L_casquillo", label: "Molde L · Casquillo (mm)", type: "num" },
+          { key: "agujas_L_cuchilla", label: "Molde L · Cuchilla (mm)", type: "num" },
+          { key: "agujas_L_cuello", label: "Molde L · Altura cuello (mm)", type: "num" },
+          { key: "agujas_R_casquillo", label: "Molde R · Casquillo (mm)", type: "num" },
+          { key: "agujas_R_cuchilla", label: "Molde R · Cuchilla (mm)", type: "num" },
+          { key: "agujas_R_cuello", label: "Molde R · Altura cuello (mm)", type: "num" }
         ]
       }
     ];
@@ -157,18 +159,20 @@ function getHmiSections(layout) {
         fields: tempFields
       },
       {
-        tag: "VARIADOR Y AGUJAS",
-        title: "Variador y herramientas L / R",
+        tag: "HERRAMIENTAS",
+        title: "Variador, cabezal y agujas (mm)",
         fields: [
           { key: "variador_hz", label: "Variador (Hz)", type: "num" },
           { key: "variador_a", label: "Variador (A)", type: "num" },
           { key: "variador_v", label: "Variador (V)", type: "num" },
-          { key: "agujas_L_casquillo", label: "Molde L · Casquillo", type: "text" },
-          { key: "agujas_L_cuchilla", label: "Molde L · Cuchilla", type: "text" },
-          { key: "agujas_L_cuello", label: "Molde L · Altura cuello", type: "text" },
-          { key: "agujas_R_casquillo", label: "Molde R · Casquillo", type: "text" },
-          { key: "agujas_R_cuchilla", label: "Molde R · Cuchilla", type: "text" },
-          { key: "agujas_R_cuello", label: "Molde R · Altura cuello", type: "text" }
+          { key: "herramientas_cono", label: "Cabezal · Cono (mm)", type: "num" },
+          { key: "herramientas_funda", label: "Cabezal · Funda (mm)", type: "num" },
+          { key: "agujas_L_casquillo", label: "Molde L · Casquillo (mm)", type: "num" },
+          { key: "agujas_L_cuchilla", label: "Molde L · Cuchilla (mm)", type: "num" },
+          { key: "agujas_L_cuello", label: "Molde L · Altura cuello (mm)", type: "num" },
+          { key: "agujas_R_casquillo", label: "Molde R · Casquillo (mm)", type: "num" },
+          { key: "agujas_R_cuchilla", label: "Molde R · Cuchilla (mm)", type: "num" },
+          { key: "agujas_R_cuello", label: "Molde R · Altura cuello (mm)", type: "num" }
         ]
       }
     ];
@@ -231,12 +235,14 @@ function getHmiSections(layout) {
         ]
       },
       {
-        tag: "AGUJAS",
-        title: "Herramientas de aguja (mm)",
+        tag: "HERRAMIENTAS",
+        title: "Cabezal y herramientas de aguja (mm)",
         fields: [
-          { key: "herramientas_casquillo", label: "Casquillo (mm)", type: "num" },
-          { key: "herramientas_cuchilla", label: "Cuchilla (mm)", type: "num" },
-          { key: "herramientas_cuello", label: "Altura del cuello (mm)", type: "num" }
+          { key: "herramientas_cono", label: "Cabezal · Cono (mm)", type: "num" },
+          { key: "herramientas_funda", label: "Cabezal · Funda (mm)", type: "num" },
+          { key: "herramientas_casquillo", label: "Aguja · Casquillo (mm)", type: "num" },
+          { key: "herramientas_cuchilla", label: "Aguja · Cuchilla (mm)", type: "num" },
+          { key: "herramientas_cuello", label: "Aguja · Altura del cuello (mm)", type: "num" }
         ]
       }
     ];

@@ -1,5 +1,5 @@
 import { numOrNull, strOrNull, toBool } from "../datos.js";
-import { secH, num, bloqueBarrasSimples, bloqueTablasLR, bloquePQ2, bloqueZonasTemp, bloqueTarjetas, bloqueAgujasLR } from "../ui/bloques.js";
+import { secH, num, bloqueBarrasSimples, bloqueTablasLR, bloquePQ2, bloqueZonasTemp, bloqueTarjetas, bloqueHerramientas } from "../ui/bloques.js";
 
 export function renderQCM75(f, q = {}) {
   const time1 = [
@@ -47,6 +47,10 @@ export function renderQCM75(f, q = {}) {
   const zonas = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((z) => ({
     z, on: toBool(q[`temp_z${z}_on`]), consigna: numOrNull(q[`temp_z${z}_consigna`]), actual: numOrNull(q[`temp_z${z}_actual`])
   }));
+  const cabezal = {
+    cono: numOrNull(q.herramientas_cono),
+    funda: numOrNull(q.herramientas_funda)
+  };
   const agujas = {
     L: { casquillo: strOrNull(q.agujas_L_casquillo), cuchilla: strOrNull(q.agujas_L_cuchilla), cuello: strOrNull(q.agujas_L_cuello) },
     R: { casquillo: strOrNull(q.agujas_R_casquillo), cuchilla: strOrNull(q.agujas_R_cuchilla), cuello: strOrNull(q.agujas_R_cuello) }
@@ -64,6 +68,6 @@ export function renderQCM75(f, q = {}) {
     ${bloqueZonasTemp(zonas, { clase: "z10" })}
     ${secH("VARIADOR", "Lectura del variador", "TRANSDUCER III")}
     ${bloqueTarjetas([{ l: "Frecuencia", v: numOrNull(q.variador_hz), u: "Hz" }])}
-    ${secH("AGUJAS", "Herramientas: casquillo, cuchilla y cuello", "Para el cambio de formato")}
-    ${bloqueAgujasLR(agujas, "Por registrar")}`;
+    ${secH("HERRAMIENTAS", "Cabezal y herramientas de aguja", "Cambio de formato (mm)")}
+    ${bloqueHerramientas({ cabezal, agujas, pend: "Por registrar" })}`;
 }
