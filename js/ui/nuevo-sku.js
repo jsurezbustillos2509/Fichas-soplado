@@ -230,8 +230,7 @@ function getHmiSections(layout) {
           { key: "manga_a", label: "Corriente (A)", type: "num" },
           { key: "manga_hz", label: "Frecuencia (Hz)", type: "num" },
           { key: "manga_perilla", label: "Perilla R10K (%)", type: "num" },
-          { key: "manga_estado", label: "Estado variador", type: "text", placeholder: "Ej: Run · REM (remoto)" },
-          { key: "manga_nota", label: "Nota anotada", type: "text", placeholder: "Ej: 400 RPM" }
+          { key: "manga_estado", label: "Estado variador (Fijo)", type: "text", fixedValue: "Run.Rem(remoto)" }
         ]
       },
       {
@@ -456,23 +455,6 @@ function openFormModal(opts) {
                 <label for="f-foto">Archivo de foto (GitHub)</label>
                 <input id="f-foto" name="foto" data-scope="receta" type="text" placeholder="Ej: 500128.320.jpg">
               </div>
-
-              <div class="field">
-                <label for="f-unidad_factor">Factor de unidad HMI</label>
-                <input id="f-unidad_factor" name="unidad_factor" data-scope="receta" type="text" inputmode="decimal" value="0.1">
-              </div>
-              <div class="field">
-                <label for="f-unidad_confirmada">Unidad confirmada</label>
-                <select id="f-unidad_confirmada" name="unidad_confirmada" data-scope="receta">
-                  <option value="FALSE" selected>FALSE (Por confirmar)</option>
-                  <option value="TRUE">TRUE (Confirmada)</option>
-                </select>
-              </div>
-
-              <div class="field span-2">
-                <label for="f-leyenda">Leyenda / Nota al pie de ficha</label>
-                <input id="f-leyenda" name="leyenda" data-scope="receta" type="text" placeholder="Ej: Gris = valor 0 o sin dato.">
-              </div>
             </div>
           </details>
 
@@ -644,11 +626,13 @@ function openFormModal(opts) {
                 </div>`;
             }
             const isNum = fld.type === "num";
+            const isFixed = fld.fixedValue !== undefined;
             return `
               <div class="field">
                 <label for="hmi-${esc(fld.key)}">${esc(fld.label)}</label>
                 <input id="hmi-${esc(fld.key)}" name="${esc(fld.key)}" data-scope="hmi" type="text"
                   ${isNum ? 'inputmode="decimal"' : ""}
+                  ${isFixed ? `value="${esc(fld.fixedValue)}" readonly style="background:var(--panel-2);color:var(--steel);cursor:not-allowed"` : ""}
                   placeholder="${esc(fld.placeholder || "Por registrar")}">
               </div>`;
           }).join("")}
@@ -684,9 +668,6 @@ function openFormModal(opts) {
       bolsas: ficha.bolsas ?? "",
       bolsasPeriodo: ficha.bolsasPeriodo ?? "",
       foto: fotoLimpia,
-      unidad_factor: ficha.unidad?.factor ?? 0.1,
-      unidad_confirmada: ficha.unidad?.confirmada ? "TRUE" : "FALSE",
-      leyenda: Array.isArray(ficha.leyenda) ? ficha.leyenda.join(" | ") : "",
       mp1_nombre: ficha.preparada?.mp1?.nombre || "",
       mp1_codigo: ficha.preparada?.mp1?.codigo || "",
       mp1_kg: ficha.preparada?.mp1?.kg ?? "",
@@ -706,6 +687,7 @@ function openFormModal(opts) {
     });
 
     form.querySelectorAll("[data-scope='hmi']").forEach((el) => {
+      if (el.readOnly) return;
       const altKey = el.name.replace("inplace", "Inplace");
       const raw = hmiRow[el.name] !== undefined ? hmiRow[el.name] : hmiRow[altKey];
       if (raw === undefined || raw === null || String(raw).trim() === "") {
@@ -742,7 +724,10 @@ function openFormModal(opts) {
       sku,
       maquina: isEdit ? ficha.maquina : (maqObj ? maqObj.maquina : layout.toUpperCase()),
       fecha: hoy,
-      version: isEdit ? (ficha.version || "1.0") : "1.0"
+      version: isEdit ? (ficha.version || "1.0") : "1.0",
+      unidad_factor: "0.1",
+      unidad_confirmada: "FALSE",
+      leyenda: ""
     };
     const hmi = { id, sku };
 

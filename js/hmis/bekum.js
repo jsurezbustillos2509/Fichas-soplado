@@ -49,7 +49,7 @@ export function renderBekum(f, b = {}) {
       { l: "Frecuencia", v: numOrNull(b.manga_hz), u: "Hz" },
       { l: "Perilla (R10K)", v: perilla, u: "%" }
     ])}
-    <p class="note">Estado del variador: ${esc(b.manga_estado || "Por registrar")}.${perilla !== null ? ` La perilla se lee a ojo (≈ ${perilla} %).` : ""} Anotado a mano: "${esc(b.manga_nota || "Por registrar")}".</p>
+    <p class="note">Estado del variador: ${esc(b.manga_estado || "Run.Rem(remoto)")}.${perilla !== null ? ` La perilla se lee a ojo (≈ ${perilla} %).` : ""}</p>
     ${secH("HERRAMIENTAS", "Cabezal y herramientas de aguja", "Cambio de formato (mm)")}
     ${bloqueHerramientas({
       cabezal: {
