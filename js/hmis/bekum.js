@@ -1,4 +1,4 @@
-import { numOrNull, toBool } from "../datos.js";
+import { numOrNull, strOrNull, toBool } from "../datos.js";
 import { secH, esc, num, n1, bloqueBarrasDobles, bloqueZonasTemp, bloqueTarjetas, bloqueHerramientas } from "../ui/bloques.js";
 
 export function renderBekum(f, b = {}) {
@@ -56,10 +56,17 @@ export function renderBekum(f, b = {}) {
         cono: numOrNull(b.herramientas_cono),
         funda: numOrNull(b.herramientas_funda)
       },
-      simple: {
-        casquillo: numOrNull(b.herramientas_casquillo),
-        cuchilla: numOrNull(b.herramientas_cuchilla),
-        cuello: numOrNull(b.herramientas_cuello)
+      agujas: {
+        L: {
+          casquillo: strOrNull(b.agujas_L_casquillo),
+          cuchilla: strOrNull(b.agujas_L_cuchilla),
+          cuello: strOrNull(b.agujas_L_cuello)
+        },
+        R: {
+          casquillo: strOrNull(b.agujas_R_casquillo),
+          cuchilla: strOrNull(b.agujas_R_cuchilla),
+          cuello: strOrNull(b.agujas_R_cuello)
+        }
       },
       pend: "Por registrar"
     })}`;

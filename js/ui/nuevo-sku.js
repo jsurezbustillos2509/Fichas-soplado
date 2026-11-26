@@ -236,13 +236,16 @@ function getHmiSections(layout) {
       },
       {
         tag: "HERRAMIENTAS",
-        title: "Cabezal y herramientas de aguja (mm)",
+        title: "Cabezal y herramientas L / R (mm)",
         fields: [
           { key: "herramientas_cono", label: "Cabezal · Cono (mm)", type: "num" },
           { key: "herramientas_funda", label: "Cabezal · Funda (mm)", type: "num" },
-          { key: "herramientas_casquillo", label: "Aguja · Casquillo (mm)", type: "num" },
-          { key: "herramientas_cuchilla", label: "Aguja · Cuchilla (mm)", type: "num" },
-          { key: "herramientas_cuello", label: "Aguja · Altura del cuello (mm)", type: "num" }
+          { key: "agujas_L_casquillo", label: "Molde L · Casquillo (mm)", type: "num" },
+          { key: "agujas_L_cuchilla", label: "Molde L · Cuchilla (mm)", type: "num" },
+          { key: "agujas_L_cuello", label: "Molde L · Altura cuello (mm)", type: "num" },
+          { key: "agujas_R_casquillo", label: "Molde R · Casquillo (mm)", type: "num" },
+          { key: "agujas_R_cuchilla", label: "Molde R · Cuchilla (mm)", type: "num" },
+          { key: "agujas_R_cuello", label: "Molde R · Altura cuello (mm)", type: "num" }
         ]
       }
     ];
