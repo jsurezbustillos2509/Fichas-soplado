@@ -1,5 +1,7 @@
 import { loadRecetas, loadHmiRow } from "./datos.js";
+import { CATEGORIAS } from "./config.js";
 import { $ } from "./ui/bloques.js";
+import { renderCategorias } from "./ui/categorias.js";
 import { renderCatalog } from "./ui/catalogo.js";
 import { renderFicha } from "./ui/ficha.js";
 import { closeOverlay } from "./ui/exportar.js";
@@ -35,19 +37,28 @@ $("#theme").addEventListener("click", () => {
 });
 applyTheme();
 
-// Enrutador reactivo (carga la hoja de la HMI solo cuando se abre esa ficha)
+// Enrutador reactivo (Categorías -> Catálogo filtrado -> Ficha)
 async function route() {
   const h = (location.hash || "").slice(1);
-  const f = FICHAS.find((x) => x.id === h);
-  const key = f ? f.id : "";
+  const catMatch = h.startsWith("cat-")
+    ? CATEGORIAS.find((c) => c.id === h.slice(4))
+    : null;
+  const f = !catMatch ? FICHAS.find((x) => x.id === h) : null;
+  const key = f ? f.id : catMatch ? `cat:${catMatch.id}` : "home";
+
   if (key === currentId) return;
 
   currentId = key;
   closeOverlay();
   window.scrollTo(0, 0);
 
+  if (catMatch) {
+    renderCatalog(FICHAS, catMatch.id);
+    return;
+  }
+
   if (!f) {
-    renderCatalog(FICHAS);
+    renderCategorias(FICHAS);
     return;
   }
 

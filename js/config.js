@@ -19,3 +19,40 @@ export const SHARE_BASE = window.location.protocol.startsWith("http")
 export const URL_GUARDAR_SKU = "https://script.google.com/macros/s/AKfycbz0VYIAom5IgEOcdjCO597TgEpO3qngbVbw9fYfx9ywliRRbdVBXNf5s3oS4FuBHq4/exec";
 export const PIN_ADMIN = "1402"; // Debe coincidir con PIN_ADMIN en tu Apps Script
 export const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/jsurezbustillos2509/Fichas-soplado/main/";
+
+// Categorías de maquinaria (Pantalla principal)
+export const CATEGORIAS = [
+  {
+    id: "sopladora",
+    titulo: "SOPLADORA",
+    subtitulo: "Extrusión-soplado PEAD (QCM-75, QCM-75-1, BEKUM)",
+    color: "#2E7D5B",
+    layouts: ["qcm-75-1", "qcm-75", "bekum"]
+  },
+  {
+    id: "pet",
+    titulo: "PET",
+    subtitulo: "Sopladora PET semiautomática · 1 molde × 2 cavidades",
+    color: "#3B82B8",
+    layouts: []
+  },
+  {
+    id: "inyeccion",
+    titulo: "INYECCIÓN",
+    subtitulo: "Inyectora hidráulica compacta (tipo ZSJ-388)",
+    color: "#B83232",
+    layouts: []
+  },
+  {
+    id: "extrusora",
+    titulo: "EXTRUSORA",
+    subtitulo: "Línea de extrusión simple continua",
+    color: "#C88A1E",
+    layouts: []
+  }
+];
+
+export function getCategoriaByLayout(layout) {
+  const key = String(layout || "").trim().toLowerCase();
+  return CATEGORIAS.find((c) => c.layouts.includes(key)) || CATEGORIAS[0];
+}

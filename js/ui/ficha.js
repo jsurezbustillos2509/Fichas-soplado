@@ -1,4 +1,4 @@
-import { SHARE_BASE } from "../config.js";
+import { SHARE_BASE, getCategoriaByLayout } from "../config.js";
 import { renderHmiBody } from "../hmis/index.js";
 import { $, esc, num, dateEs, moldesTxt, toast } from "./bloques.js";
 import { renderOperador, bindOperador, renderMolinero, bindMolinero } from "./calculadora.js";
@@ -142,7 +142,10 @@ export function renderFicha(f, hmiRow) {
     if (btn) paintRole(btn.dataset.role);
   });
 
-  $("#back").addEventListener("click", () => { location.hash = ""; });
+  $("#back").addEventListener("click", () => {
+    const cat = getCategoriaByLayout(f.layout);
+    location.hash = `cat-${cat.id}`;
+  });
   $("#edit-sku").addEventListener("click", () => {
     openEditSkuFlow(f, hmiRow, (updatedFicha, updatedHmi) => {
       renderFicha(updatedFicha, updatedHmi);

@@ -1,37 +1,65 @@
 import { isFichaIncompleta } from "../datos.js";
+import { CATEGORIAS } from "../config.js";
 import { $, esc, num, stats } from "./bloques.js";
 import { openNewSkuFlow } from "./nuevo-sku.js";
+import { getMachineSvg } from "./categorias.js";
 
 const filt = { maq: "", q: "" };
 
-export function renderCatalog(fichas) {
-  const maqs = [...new Set(fichas.map((f) => f.maquina).filter(Boolean))].sort();
+export function renderCatalog(fichas, catId = "sopladora") {
+  const cat = CATEGORIAS.find((c) => c.id === catId) || CATEGORIAS[0];
+  const catFichas = fichas.filter((f) => cat.layouts.includes(f.layout));
+  const maqs = [...new Set(catFichas.map((f) => f.maquina).filter(Boolean))].sort();
+
+  if (filt.maq && !maqs.includes(filt.maq)) filt.maq = "";
+
   $("#app").innerHTML = `
+    <div class="nav">
+      <a class="btn" href="#">← Categorías</a>
+      <span class="sp"></span>
+      ${cat.layouts.length ? `<button class="btn solid" id="btn-new-sku" type="button">+ Agregar SKU</button>` : ""}
+    </div>
     <div class="page-h">
       <div>
-        <h1>Catálogo de recetas</h1>
+        <h1>Catálogo · ${esc(cat.titulo)}</h1>
         <span class="count" id="count"></span>
       </div>
-      <button class="btn solid" id="btn-new-sku" type="button">+ Agregar SKU</button>
     </div>
-    <p class="lead">Elige una máquina o busca por SKU o descripción. También puedes escanear el QR pegado en la máquina para abrir directo su ficha.</p>
-    <div class="filters">
-      <div class="field"><label for="f-maq">Máquina</label>
-        <select id="f-maq"><option value="">Todas</option>${maqs.map((m) => `<option value="${esc(m)}"${m === filt.maq ? " selected" : ""}>${esc(m)}</option>`).join("")}</select>
+    <p class="lead">${esc(cat.subtitulo)}</p>
+    ${cat.layouts.length ? `
+      <div class="filters">
+        <div class="field"><label for="f-maq">Máquina</label>
+          <select id="f-maq"><option value="">Todas</option>${maqs.map((m) => `<option value="${esc(m)}"${m === filt.maq ? " selected" : ""}>${esc(m)}</option>`).join("")}</select>
+        </div>
+        <div class="field"><label for="f-q">Buscar SKU o descripción</label>
+          <input id="f-q" type="search" placeholder="500128 o cera" value="${esc(filt.q)}" autocomplete="off">
+        </div>
+        <button class="btn" id="f-clear" type="button">Limpiar</button>
       </div>
-      <div class="field"><label for="f-q">Buscar SKU o descripción</label>
-        <input id="f-q" type="search" placeholder="500128 o cera" value="${esc(filt.q)}" autocomplete="off">
-      </div>
-      <button class="btn" id="f-clear" type="button">Limpiar</button>
-    </div>
-    <div class="cards" id="cards"></div>`;
+    ` : ""}
+    <div class="cards" id="cards"></div>
+    <footer class="app-foot">FICHAS DE PROCESO · SOPLADO</footer>`;
 
   const draw = () => {
+    if (!cat.layouts.length || !catFichas.length) {
+      $("#count").textContent = "0 fichas registradas";
+      $("#cards").innerHTML = `
+        <div class="empty-machine-box">
+          <div class="empty-machine-stage" style="--cat-bg:${esc(cat.color)}">
+            ${getMachineSvg(cat.id)}
+          </div>
+          <h3>Categoría ${esc(cat.titulo)} sin máquinas aún</h3>
+          <p>Todavía no hay máquinas ni SKUs registrados en <b>${esc(cat.titulo)}</b>. Cuando incorpores este equipo en planta, aparecerán aquí sus recetas técnicas.</p>
+          <a class="btn solid" href="#">← Volver a categorías</a>
+        </div>`;
+      return;
+    }
+
     const q = filt.q.trim().toLowerCase();
-    const list = fichas.filter(
+    const list = catFichas.filter(
       (f) => (!filt.maq || f.maquina === filt.maq) && (!q || `${f.sku} ${f.desc} ${f.maquina}`.toLowerCase().includes(q))
     );
-    $("#count").textContent = `${list.length} ${list.length === 1 ? "ficha" : "fichas"} de ${fichas.length}`;
+    $("#count").textContent = `${list.length} ${list.length === 1 ? "ficha" : "fichas"} de ${catFichas.length}`;
     $("#cards").innerHTML = list.length
       ? list.map((f, idx) => {
           const s = stats(f);
@@ -71,14 +99,22 @@ export function renderCatalog(fichas) {
     }
   }, true);
 
-  $("#btn-new-sku").addEventListener("click", () => {
-    openNewSkuFlow(fichas, () => renderCatalog(fichas));
-  });
+  const btnNew = $("#btn-new-sku");
+  if (btnNew) {
+    btnNew.addEventListener("click", () => {
+      openNewSkuFlow(fichas, () => renderCatalog(fichas, cat.id));
+    });
+  }
 
-  $("#f-maq").addEventListener("change", (e) => { filt.maq = e.target.value; draw(); });
-  $("#f-q").addEventListener("input", (e) => { filt.q = e.target.value; draw(); });
-  $("#f-clear").addEventListener("click", () => {
-    filt.maq = ""; filt.q = ""; $("#f-maq").value = ""; $("#f-q").value = ""; draw();
-  });
+  const selMaq = $("#f-maq");
+  const inQ = $("#f-q");
+  const btnClear = $("#f-clear");
+  if (selMaq) selMaq.addEventListener("change", (e) => { filt.maq = e.target.value; draw(); });
+  if (inQ) inQ.addEventListener("input", (e) => { filt.q = e.target.value; draw(); });
+  if (btnClear) {
+    btnClear.addEventListener("click", () => {
+      filt.maq = ""; filt.q = ""; if (selMaq) selMaq.value = ""; if (inQ) inQ.value = ""; draw();
+    });
+  }
   draw();
 }

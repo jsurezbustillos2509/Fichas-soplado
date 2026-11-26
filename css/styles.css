@@ -626,3 +626,97 @@ h1,h2{margin:0}
 .confirm-grid div{background:var(--panel);border:1px solid var(--edge);padding:8px 10px;display:flex;flex-direction:column;gap:2px}
 .confirm-grid small{font-family:var(--font-display);font-size:13px;text-transform:uppercase;color:var(--steel);letter-spacing:.06em}
 .confirm-grid b{font-family:var(--font-data);font-size:15px}
+/* Pantalla 1: Hub de Categorías y Animaciones Industriales */
+.cat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:8px}
+.cat-card{display:flex;flex-direction:column;border:2px solid var(--edge);background:var(--plate-bg);color:var(--plate-fg);text-decoration:none;overflow:hidden;transition:transform .2s cubic-bezier(.22,1,.36,1),border-color .22s ease,box-shadow .22s ease}
+.cat-card:hover{border-color:var(--yellow);box-shadow:0 0 0 3px var(--yellow);transform:translateY(-2px)}
+.cat-card:active{transform:scale(.98)}
+
+.cat-stage{position:relative;height:184px;background:var(--cat-bg,#2E7D5B);display:grid;place-items:center;padding:14px;overflow:hidden;border-bottom:2px solid var(--edge)}
+.cat-stage::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.16),transparent 68%),repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 1px,transparent 1px 16px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 1px,transparent 1px 16px);pointer-events:none}
+.cat-stage svg{position:relative;z-index:1;width:100%;max-width:290px;height:152px;overflow:visible;filter:drop-shadow(0 6px 12px rgba(0,0,0,.28))}
+
+.cat-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:var(--plate-bg)}
+.cat-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cat-info h2{font-family:var(--font-display);font-weight:700;font-size:clamp(24px,4vw,30px);text-transform:uppercase;letter-spacing:.03em;line-height:1.05;color:#FFFFFF}
+.cat-count{font-family:var(--font-data);font-weight:600;font-size:13px;letter-spacing:.06em;color:var(--yellow);text-transform:uppercase}
+.cat-arrow{width:40px;height:40px;flex-shrink:0;background:var(--yellow);color:var(--on-yellow);display:grid;place-items:center;font-family:var(--font-data);font-weight:700;font-size:20px;transition:transform .2s ease}
+.cat-card:hover .cat-arrow{transform:translateX(3px)}
+
+/* Vista vacía animada (PET, Inyección, Extrusora) */
+.empty-machine-box{grid-column:1 / -1;background:var(--panel);border:2px solid var(--edge);padding:26px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px}
+.empty-machine-stage{width:100%;max-width:360px;height:185px;border:2px solid var(--edge);background:var(--cat-bg,#3B82B8);display:grid;place-items:center;padding:14px;position:relative;overflow:hidden}
+.empty-machine-stage::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.18),transparent 70%);pointer-events:none}
+.empty-machine-stage svg{position:relative;z-index:1;width:100%;max-width:300px;height:155px}
+.empty-machine-box h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink)}
+.empty-machine-box p{margin:0;max-width:52ch;color:var(--steel);font-size:15px}
+
+/* Pie de página global */
+.app-foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);text-align:center;font-family:var(--font-data);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel)}
+
+/* Animaciones mecánicas de las 4 máquinas */
+@keyframes mParison{
+  0%,15%{transform:scaleY(.15)}
+  38%,75%{transform:scaleY(1)}
+  88%,100%{transform:scaleY(.15)}
+}
+@keyframes mClampL{
+  0%,28%{transform:translateX(-14px)}
+  42%,82%{transform:translateX(0)}
+  94%,100%{transform:translateX(-14px)}
+}
+@keyframes mClampR{
+  0%,28%{transform:translateX(14px)}
+  42%,82%{transform:translateX(0)}
+  94%,100%{transform:translateX(14px)}
+}
+@keyframes mBlowBottle{
+  0%,44%{transform:scale(.45,.85);opacity:.35}
+  58%,80%{transform:scale(1,1);opacity:1}
+  90%,100%{transform:scale(.45,.85);opacity:0}
+}
+@keyframes mPetRod{
+  0%,20%{transform:translateY(-18px)}
+  40%,72%{transform:translateY(0)}
+  88%,100%{transform:translateY(-18px)}
+}
+@keyframes mPetBottle{
+  0%,36%{transform:scale(.42,.75);opacity:.5}
+  55%,78%{transform:scale(1,1);opacity:1}
+  90%,100%{transform:scale(.42,.75);opacity:.4}
+}
+@keyframes mInjScrew{
+  0%,18%{transform:translateX(0)}
+  38%,64%{transform:translateX(22px)}
+  82%,100%{transform:translateX(0)}
+}
+@keyframes mInjPart{
+  0%,66%{transform:translateY(0);opacity:0}
+  72%{transform:translateY(0);opacity:1}
+  92%{transform:translateY(26px);opacity:1}
+  100%{transform:translateY(32px);opacity:0}
+}
+@keyframes mExtFlow{
+  from{stroke-dashoffset:24}
+  to{stroke-dashoffset:0}
+}
+@keyframes mHeaterGlow{
+  0%,100%{opacity:.55}
+  50%{opacity:1}
+}
+
+.anim-parison{transform-box:fill-box;transform-origin:50% 0%;animation:mParison 4s ease-in-out infinite}
+.anim-clamp-l{animation:mClampL 4s ease-in-out infinite}
+.anim-clamp-r{animation:mClampR 4s ease-in-out infinite}
+.anim-blow-bottle{transform-box:fill-box;transform-origin:50% 50%;animation:mBlowBottle 4s ease-in-out infinite}
+.anim-pet-rod{animation:mPetRod 3.8s ease-in-out infinite}
+.anim-pet-bottle{transform-box:fill-box;transform-origin:50% 10%;animation:mPetBottle 3.8s ease-in-out infinite}
+.anim-inj-screw{animation:mInjScrew 3.6s ease-in-out infinite}
+.anim-inj-part{animation:mInjPart 3.6s ease-in-out infinite}
+.anim-ext-flow{stroke-dasharray:6 6;animation:mExtFlow 1.1s linear infinite}
+.anim-heater{animation:mHeaterGlow 2.2s ease-in-out infinite}
+
+@media (max-width:640px){
+  .cat-grid{grid-template-columns:minmax(0,1fr)}
+  .cat-stage{height:156px}
+}
