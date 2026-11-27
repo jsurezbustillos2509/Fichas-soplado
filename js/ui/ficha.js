@@ -43,9 +43,10 @@ function qrSvg(text) {
 
 export function renderFicha(f, hmiRow) {
   const url = `${SHARE_BASE}#${f.id}`;
-  let activeRole = localStorage.getItem("fp-role") || "operador";
-  if (!ROLES.some((r) => r.id === activeRole)) activeRole = "operador";
   const esPet = getCategoriaByLayout(f.layout)?.id === "pet";
+  const rolesDisponibles = esPet ? ROLES.filter((r) => r.id !== "molinero") : ROLES;
+  let activeRole = localStorage.getItem("fp-role") || "operador";
+  if (!rolesDisponibles.some((r) => r.id === activeRole)) activeRole = "operador";
 
   $("#app").innerHTML = `
     <div class="nav" data-nav>
@@ -90,7 +91,7 @@ export function renderFicha(f, hmiRow) {
 
       <!-- Barra de roles (no aparece en la foto exportada para WhatsApp) -->
       <nav class="role-bar" id="role-bar" data-no-export="true" aria-label="Filtrar ficha por rol">
-        ${ROLES.map((r) => `<button class="role-btn" type="button" data-role="${r.id}">${r.label}</button>`).join("")}
+        ${rolesDisponibles.map((r) => `<button class="role-btn" type="button" data-role="${r.id}">${r.label}</button>`).join("")}
       </nav>
 
       <!-- Contenido dinámico según el rol seleccionado -->
@@ -142,15 +143,11 @@ export function renderFicha(f, hmiRow) {
     } else if (role === "mecanico") {
       box.innerHTML = renderHmiBody(f, hmiRow);
     } else if (role === "molinero") {
-      if (esPet) {
-        box.innerHTML = renderPreformaPet(f);
-      } else {
-        box.innerHTML = renderMolinero(f);
-        bindMolinero(f);
-      }
+      box.innerHTML = renderMolinero(f);
+      bindMolinero(f);
     } else {
       if (esPet) {
-        box.innerHTML = renderOperador(f) + renderPreformaPet(f) + renderHmiBody(f, hmiRow);
+        box.innerHTML = renderOperador(f) + renderHmiBody(f, hmiRow);
         bindOperador(f);
       } else {
         box.innerHTML = renderOperador(f) + renderMolinero(f) + renderHmiBody(f, hmiRow);
