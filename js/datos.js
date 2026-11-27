@@ -64,6 +64,7 @@ function mapRecetaRow(r) {
     leyenda: r.leyenda
       ? String(r.leyenda).split("|").map((t) => t.trim()).filter(Boolean)
       : [],
+    observaciones: strOrNull(r.observaciones),
     // Datos del Molinero (Preparada)
     preparada: {
       mp1: {
@@ -91,15 +92,16 @@ function mapRecetaRow(r) {
 
 // Detecta si a una ficha le faltan datos estándar en RECETAS
 export function isFichaIncompleta(f) {
+  const esPet = String(f.layout || "").trim().toLowerCase().startsWith("pet");
   return (
     !f.desc ||
-    f.ciclo === null ||
+    (!esPet && f.ciclo === null) ||
     f.moldes === null ||
     f.cavidades === null ||
     f.pesoG === null ||
     f.envasesPorBolsa === null ||
     !f.foto ||
-    f.preparada?.mp1?.kg === null
+    (!esPet && f.preparada?.mp1?.kg === null)
   );
 }
 

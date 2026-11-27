@@ -7,7 +7,8 @@ export const URL_RECETAS =
 export const HMI_URLS = {
   "qcm-75-1": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=1&single=true&output=csv",
   "qcm-75":   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=1304841054&single=true&output=csv",
-  "bekum":    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=2&single=true&output=csv"
+  "bekum":    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pub?gid=2&single=true&output=csv",
+  "pet-1":    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTehGw7Jj9XknMHf3I0UApujodM4QsUFFNAo6tZ8LuBgdVIcmYOhdI_2mgsC7NAoiLAU7ZK9Jf_1kY/pubhtml?gid=1677897756&single=true"
 };
 
 // Dirección pública en GitHub Pages para generar los códigos QR
@@ -34,7 +35,7 @@ export const CATEGORIAS = [
     titulo: "PET",
     subtitulo: "Sopladora PET semiautomática · 1 molde × 2 cavidades",
     color: "#3B82B8",
-    layouts: []
+    layouts: ["pet-1"]
   },
   {
     id: "inyeccion",

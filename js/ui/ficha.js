@@ -7,6 +7,21 @@ import { renderAvanceTurno, bindAvanceTurno } from "./avance.js";
 import { saveImage } from "./exportar.js";
 import { openEditSkuFlow } from "./nuevo-sku.js";
 
+function renderPreformaPet(f) {
+  const mp = f.preparada?.mp1 || {};
+  return `
+    <section class="card" style="margin-top:12px">
+      <span class="sk-tag">INSUMO PET · PROCESO NATURAL</span>
+      <h3 style="margin:6px 0 10px">Preforma asignada (sin masterbatch)</h3>
+      <div class="confirm-grid">
+        <div><small>Preforma</small><b>${esc(mp.nombre || "Por registrar")}</b></div>
+        <div><small>Código</small><b>${esc(mp.codigo || "Por registrar")}</b></div>
+        <div><small>Peso unitario</small><b>${f.pesoG !== null ? `${num(f.pesoG)} g` : "Por registrar"}</b></div>
+        <div><small>Observación técnica</small><b>${esc(f.observaciones || "Sin observaciones")}</b></div>
+      </div>
+    </section>`;
+}
+
 const ROLES = [
   { id: "operador", label: "Operador" },
   { id: "mecanico", label: "Mecánico" },
@@ -30,6 +45,7 @@ export function renderFicha(f, hmiRow) {
   const url = `${SHARE_BASE}#${f.id}`;
   let activeRole = localStorage.getItem("fp-role") || "operador";
   if (!ROLES.some((r) => r.id === activeRole)) activeRole = "operador";
+  const esPet = getCategoriaByLayout(f.layout)?.id === "pet";
 
   $("#app").innerHTML = `
     <div class="nav" data-nav>
@@ -48,25 +64,27 @@ export function renderFicha(f, hmiRow) {
           ? `<div class="foto"><img src="${esc(f.foto)}" alt="Envase ${esc(f.desc)}" fetchpriority="high" decoding="async"></div>`
           : `<div class="foto ph-empty"><span>Sin foto</span></div>`}
         <div class="info">
-          <div class="kicker">Ficha de proceso · Soplado PEAD · <span class="role-badge" id="role-badge"></span></div>
+          <div class="kicker">Ficha de proceso · ${esPet ? "Soplado PET" : "Soplado PEAD"} · <span class="role-badge" id="role-badge"></span></div>
           <div class="sku-big">${esc(f.sku)}</div>
           <div class="desc-big">${f.desc ? esc(f.desc) : '<span class="pend-inline">Descripción por registrar</span>'}</div>
           <div class="chips">
             <span class="chip">MÁQUINA ${esc(f.maquina)}</span>
             <span class="chip out" style="color:var(--plate-fg);border-color:var(--plate-mute)">${moldesTxt(f)}</span>
+            ${f.observaciones ? `<span class="chip">${esc(f.observaciones)}</span>` : ""}
           </div>
         </div>
         <div class="lcds">
           <div class="lcd" id="lcd-meta">
-            <small>Meta</small>
+            <small>Meta${f.bolsasPeriodo ? ` (${esc(f.bolsasPeriodo)})` : ""}</small>
             <span class="dig${f.bolsas !== null && f.bolsas > 0 ? "" : " dig-pend"}">${f.bolsas !== null && f.bolsas > 0 ? Math.floor(f.bolsas) : "Por reg."}</span>
             <span class="u">bolsas</span>
           </div>
+          ${esPet ? "" : `
           <div class="lcd">
             <small>${esc(f.cicloTipo || "Ciclo real")}</small>
             <span class="dig${f.ciclo !== null && f.ciclo > 0 ? "" : " dig-pend"}">${f.ciclo !== null && f.ciclo > 0 ? num(f.ciclo) : "Por reg."}</span>
             <span class="u">${f.ciclo !== null && f.ciclo > 0 ? "segundos" : "sin ciclo"}</span>
-          </div>
+          </div>`}
         </div>
       </div>
 
@@ -117,19 +135,28 @@ export function renderFicha(f, hmiRow) {
 
     const box = $("#role-content");
     if (role === "operador") {
-      box.innerHTML = renderCronoPanel(f) + renderOperador(f) + renderAvanceTurno(f);
-      bindCronoPanel(f);
+      box.innerHTML = (esPet ? "" : renderCronoPanel(f)) + renderOperador(f) + renderAvanceTurno(f);
+      if (!esPet) bindCronoPanel(f);
       bindOperador(f);
       bindAvanceTurno(f);
     } else if (role === "mecanico") {
       box.innerHTML = renderHmiBody(f, hmiRow);
     } else if (role === "molinero") {
-      box.innerHTML = renderMolinero(f);
-      bindMolinero(f);
+      if (esPet) {
+        box.innerHTML = renderPreformaPet(f);
+      } else {
+        box.innerHTML = renderMolinero(f);
+        bindMolinero(f);
+      }
     } else {
-      box.innerHTML = renderOperador(f) + renderMolinero(f) + renderHmiBody(f, hmiRow);
-      bindOperador(f);
-      bindMolinero(f);
+      if (esPet) {
+        box.innerHTML = renderOperador(f) + renderPreformaPet(f) + renderHmiBody(f, hmiRow);
+        bindOperador(f);
+      } else {
+        box.innerHTML = renderOperador(f) + renderMolinero(f) + renderHmiBody(f, hmiRow);
+        bindOperador(f);
+        bindMolinero(f);
+      }
     }
 
     box.classList.remove("role-anim");

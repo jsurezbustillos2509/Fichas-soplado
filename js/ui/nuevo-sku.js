@@ -8,7 +8,8 @@ const SESSION_MS = 30 * 60 * 1000; // 30 minutos
 const MAQUINAS = [
   { layout: "qcm-75-1", maquina: "QCM-75-1", hmiDefault: "Siemens Smart Line" },
   { layout: "qcm-75",   maquina: "QCM-75",   hmiDefault: "HMI QCM-75" },
-  { layout: "bekum",    maquina: "BEKUM",    hmiDefault: "HMI Bekum" }
+  { layout: "bekum",    maquina: "BEKUM",    hmiDefault: "HMI Bekum" },
+  { layout: "pet-1",    maquina: "PET-1",    hmiDefault: "Panel PET (Time Setting + Preforms Heater)" }
 ];
 
 // Definición de secciones HMI dinámicas por máquina (coinciden 1 a 1 con las columnas del Sheet)
@@ -250,6 +251,44 @@ function getHmiSections(layout) {
     ];
   }
 
+  if (layout === "pet-1") {
+    const heaterFields = [];
+    for (const z of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
+      const Z = z.toUpperCase();
+      heaterFields.push(
+        { key: `heater_${z}_pv`, label: `Temp Control ${Z} · PV (°C)`, type: "num" },
+        { key: `heater_${z}_sv`, label: `Temp Control ${Z} · SV (°C)`, type: "num" }
+      );
+    }
+    heaterFields.push(
+      { key: "heater_ind_pv", label: "Temp Indicator · PV (°C)", type: "num" },
+      { key: "heater_ind_sv", label: "Temp Indicator · SV (°C)", type: "num" },
+      { key: "heater_transducer", label: "Transducer", type: "num" }
+    );
+
+    return [
+      {
+        tag: "TIME SETTING",
+        title: "Tiempos de soplado (PET-1)",
+        fields: [
+          ["time_c_mould", "C. MOULD (s)"], ["time_se_delay", "SE. DELAY (s)"],
+          ["time_seal_time", "SEAL TIME (s)"], ["time_st_delay", "ST. DELAY (s)"],
+          ["time_stretch", "STRETCH (s)"], ["time_l_b_delay", "L.B. DELAY (s)"],
+          ["time_l_blowing", "L. BLOWING (s)"], ["time_r_b_delay", "R.B. DELAY (s)"],
+          ["time_r_blowing", "R. BLOWING (s)"], ["time_l_e_delay", "L.E. DELAY (s)"],
+          ["time_l_excr_air", "L. EXCR. AIR (s)"], ["time_r_e_delay", "R.E. DELAY (s)"],
+          ["time_r_excr_air", "R. EXCR. AIR (s)"], ["time_spare_1", "SPARE 1 (s)"],
+          ["time_spare_2", "SPARE 2 (s)"]
+        ].map(([k, l]) => ({ key: k, label: l, type: "num" }))
+      },
+      {
+        tag: "PREFORMS HEATER",
+        title: "Calefacción de preformas (A–H, Indicator y Transducer)",
+        fields: heaterFields
+      }
+    ];
+  }
+
   return [];
 }
 
@@ -454,6 +493,10 @@ function openFormModal(opts) {
               <div class="field">
                 <label for="f-foto">Archivo de foto (GitHub)</label>
                 <input id="f-foto" name="foto" data-scope="receta" type="text" placeholder="Ej: 500128.320.jpg">
+              </div>
+              <div class="field span-2">
+                <label for="f-observaciones">Observaciones técnicas (Ej: espacios por preforma)</label>
+                <input id="f-observaciones" name="observaciones" data-scope="receta" type="text" placeholder="Ej: 16-18 espacios x preforma">
               </div>
             </div>
           </details>
@@ -668,6 +711,7 @@ function openFormModal(opts) {
       bolsas: ficha.bolsas ?? "",
       bolsasPeriodo: ficha.bolsasPeriodo ?? "",
       foto: fotoLimpia,
+      observaciones: ficha.observaciones || "",
       mp1_nombre: ficha.preparada?.mp1?.nombre || "",
       mp1_codigo: ficha.preparada?.mp1?.codigo || "",
       mp1_kg: ficha.preparada?.mp1?.kg ?? "",
@@ -727,7 +771,8 @@ function openFormModal(opts) {
       version: isEdit ? (ficha.version || "1.0") : "1.0",
       unidad_factor: "0.1",
       unidad_confirmada: "FALSE",
-      leyenda: ""
+      leyenda: "",
+      observaciones: ""
     };
     const hmi = { id, sku };
 
